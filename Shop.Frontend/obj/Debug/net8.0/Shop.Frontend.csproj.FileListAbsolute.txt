@@ -28,3 +28,4 @@ D:\work\Dotnet\Shop\Shop.Frontend\obj\Debug\net8.0\refint\Shop.Frontend.dll
 D:\work\Dotnet\Shop\Shop.Frontend\obj\Debug\net8.0\Shop.Frontend.pdb
 D:\work\Dotnet\Shop\Shop.Frontend\obj\Debug\net8.0\Shop.Frontend.genruntimeconfig.cache
 D:\work\Dotnet\Shop\Shop.Frontend\obj\Debug\net8.0\ref\Shop.Frontend.dll
+D:\work\Dotnet\Shop\Shop.Frontend\obj\Debug\net8.0\Shop.Frontend.sourcelink.json
