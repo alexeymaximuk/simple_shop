@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Shop.Users.Data;
 
 #nullable disable
 
 namespace Shop.Users.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20260504121337_Init")]
+    [Migration("20260504154254_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -24,7 +25,7 @@ namespace Shop.Users.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("User", b =>
+            modelBuilder.Entity("Shop.Users.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,10 +40,6 @@ namespace Shop.Users.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PasswordSalt")
                         .IsRequired()
                         .HasColumnType("text");
 

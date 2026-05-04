@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Shop.Users.Controllers; 
 
@@ -6,9 +7,26 @@ namespace Shop.Users.Controllers;
 [Route("api/users")]
 public class UserController : ControllerBase
 {
+    private readonly IUserService _userService;
+
+    public UserController(IUserService userService)
+    {
+        _userService = userService;
+    }
+    
     [HttpGet]
     public IActionResult Get() => Ok();
-    
+
     [HttpPost]
-    public IActionResult Create() => Ok();
+    public async Task<IActionResult> Create(CreateUserDto dto, IValidator<CreateUserDto> validator)
+    {
+        var validationResult = await validator.ValidateAsync(dto);
+        
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        await _userService.CreateUser(dto);
+        
+        return Ok();
+    }
 }

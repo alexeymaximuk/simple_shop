@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shop.Users.Models;
+
+namespace Shop.Users.Data;
 
 public class UsersDbContext : DbContext
 {
