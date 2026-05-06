@@ -1,6 +1,6 @@
-﻿namespace Shop.Users.DTOs;
+﻿namespace Shop.Users.DTOs.Auth;
 
-public class CreateUserDto
+public class RegisterUserDto
 {
     public string Name { get; set; }
     public string Password { get; set; }

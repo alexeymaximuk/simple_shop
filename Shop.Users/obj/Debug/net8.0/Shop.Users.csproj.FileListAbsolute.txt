@@ -112,3 +112,16 @@ D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.W
 D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\FluentValidation.dll
 D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\MailKit.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\MimeKit.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
+D:\work\Dotnet\Shop\Shop.Users\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll

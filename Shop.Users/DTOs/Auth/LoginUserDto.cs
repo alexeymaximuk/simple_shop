@@ -1,4 +1,4 @@
-﻿namespace Shop.Users.DTOs;
+﻿namespace Shop.Users.DTOs.Auth;
 
 public class LoginUserDto
 {

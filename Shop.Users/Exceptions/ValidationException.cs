@@ -1,3 +1,3 @@
 ﻿namespace Shop.Users.Exceptions;
 
-public class ValidationException(string message) : Exception(message);
+public class ValidationException(string message) : AppException(message, 422);

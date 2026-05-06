@@ -1,15 +1,16 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Shop.Users.DTOs.Auth;
 using Shop.Users.Models;
 
 namespace Shop.Users.Services;
 
 public partial class AuthService
 {
-    private string GenerateToken(User user)
+    private string GenerateJwtToken(User user)
     {
         var claims = new []
         {
@@ -18,7 +19,7 @@ public partial class AuthService
             new Claim(ClaimTypes.Role, user.Role)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
@@ -30,5 +31,22 @@ public partial class AuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
+    private static User MapToEntity(RegisterUserDto dto)
+    {
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Name = dto.Name,
+            Email = dto.Email
+        };
+
+        return user;
+    }
+    
+    private string GenerateToken()
+    {
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 }

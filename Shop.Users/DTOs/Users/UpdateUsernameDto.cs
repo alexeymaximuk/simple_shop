@@ -1,7 +1,6 @@
 ﻿namespace Shop.Users.DTOs;
 
-public class UpdateUserDto
+public class UpdateUsernameDto
 {
     public string Name { get; set; }
-    public string Email { get; set; }
 }

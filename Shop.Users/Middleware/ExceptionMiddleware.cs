@@ -2,7 +2,7 @@
 
 namespace Shop.Users.Middleware;
 
-public class ExceptionMiddleware(RequestDelegate next)
+public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext httpContext)
     {
@@ -10,30 +10,16 @@ public class ExceptionMiddleware(RequestDelegate next)
         {
             await next(httpContext);
         }
-        catch (NotFoundException ex)
+        catch (AppException ex)
         {
-            httpContext.Response.StatusCode = 404;
-            await httpContext.Response.WriteAsJsonAsync(new {error = ex.Message});
-        }
-        catch (ValidationException ex)
-        {
-            httpContext.Response.StatusCode = 400;
-            await httpContext.Response.WriteAsJsonAsync(new {error = ex.Message});
-        }
-        catch (AuthorisationException ex)
-        {
-            httpContext.Response.StatusCode = 401;
-            await httpContext.Response.WriteAsJsonAsync(new {error = ex.Message});
-        }
-        catch (DuplicateMailException ex)
-        {
-            httpContext.Response.StatusCode = 400;
-            await httpContext.Response.WriteAsJsonAsync(new {error = ex.Message});
+            httpContext.Response.StatusCode = ex.StatusCode;
+            await httpContext.Response.WriteAsJsonAsync(new { error = ex.Message });
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Unhandled exception");
             httpContext.Response.StatusCode = 500;
-            await httpContext.Response.WriteAsJsonAsync(new {error = "Internal server error"});
+            await httpContext.Response.WriteAsJsonAsync(new { error = "Internal server error" });
         }
     }
 }

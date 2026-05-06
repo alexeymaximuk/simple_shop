@@ -1,47 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Shop.Users.Data;
 using Shop.Users.DTOs;
 using Shop.Users.Exceptions;
-using Shop.Users.Models;
 
 namespace Shop.Users.Services;
 
-public partial class UserService (UsersDbContext dbContext, IPasswordHasher<User> passwordHasher)
-    :  IUserService
+public partial class UserService (UsersDbContext dbContext) : IUserService
 {
-    public async Task<User> RegisterAsync(CreateUserDto dto)
-    {
-        var existingUser = dbContext.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
-        if (existingUser != null) throw new DuplicateMailException("Mail already registered");
-        
-        var newUser = MapToEntity(dto);
-        
-        var hashedPassword = passwordHasher.HashPassword(newUser, dto.Password);
-        newUser.PasswordHash = hashedPassword;
-        
-        dbContext.Users.Add(newUser);
-        await dbContext.SaveChangesAsync();
-        
-        return newUser;
-    }
-    
-    public async Task<User?> GetByIdAsync(Guid id)
+    public async Task UpdateUsernameAsync(Guid id, UpdateUsernameDto dto)
     {
         var user = await dbContext.Users.FindAsync(id);
-        if (user == null) throw new NotFoundException($"User with id {id} not found");
-
-        return user;
-    }
-    
-    public async Task<IEnumerable<User>> GetAllAsync()
-    {
-        return await dbContext.Users.ToListAsync();
-    }
-    
-    public Task UpdateAsync(Guid id, UpdateUserDto dto)
-    {
-        throw new NotImplementedException();
+        if (user is null) throw new NotFoundException($"User {id} not found");
+        
+        user.Name = dto.Name;
     }
     
     public async Task DeleteAsync(Guid id)
@@ -63,7 +34,22 @@ public partial class UserService (UsersDbContext dbContext, IPasswordHasher<User
     {
         var user = await dbContext.Users.FindAsync(id);
         if (user is null) throw new NotFoundException($"User {id} not found");
-        user.IsActive = false;
+        user.IsActive = true;
         await dbContext.SaveChangesAsync();
+    }
+    
+    public async Task<UserResponseDto?> GetByIdAsync(Guid id)
+    {
+        return await dbContext.Users
+            .Where(u => u.Id == id)
+            .Select(MapToResponseDto)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<UserResponseDto>> GetAllAsync()
+    {
+        return await dbContext.Users
+            .Select(MapToResponseDto)
+            .ToListAsync();
     }
 }
