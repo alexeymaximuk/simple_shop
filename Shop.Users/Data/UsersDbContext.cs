@@ -3,9 +3,7 @@ using Shop.Users.Models;
 
 namespace Shop.Users.Data;
 
-public class UsersDbContext : DbContext
+public class UsersDbContext (DbContextOptions<UsersDbContext> options) : DbContext(options)
 {
-    public UsersDbContext(DbContextOptions<UsersDbContext> options) : base(options) { }
-    
     public DbSet<User> Users { get; set; }
 }
