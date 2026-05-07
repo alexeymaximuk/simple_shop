@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shop.Shared.Exceptions;
 using Shop.Users.Data;
 using Shop.Users.DTOs;
-using Shop.Users.Exceptions;
 
 namespace Shop.Users.Services;
 

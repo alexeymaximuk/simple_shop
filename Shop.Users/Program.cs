@@ -3,16 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Users.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
-using Shop.Users.DTOs;
-using Shop.Users.Middleware;
 using Shop.Users.Models;
 using Shop.Users.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shop.Shared.Extensions;
+using Shop.Shared.Middleware;
+using Shop.Shared.Settings;
 using Shop.Users.DTOs.Validators;
-using Shop.Users.Exceptions;
-using Shop.Users.Extensions;
 using Shop.Users.Services.Interfaces;
 using Shop.Users.Settings;
 
@@ -83,6 +82,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         }
     );
 
+// app
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

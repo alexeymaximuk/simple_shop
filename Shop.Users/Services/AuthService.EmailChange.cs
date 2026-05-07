@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shop.Shared.Exceptions;
 using Shop.Users.DTOs.Auth;
-using Shop.Users.Exceptions;
 using Shop.Users.Models;
 
 namespace Shop.Users.Services;
@@ -21,7 +21,7 @@ public partial class AuthService
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(x => x.EmailChangeToken == token);
         if (user == null) throw new NotFoundException("User with that email change token not found");
-        if (user.PendingEmail == null) throw new ValidationException("User has not been pending email");
+        if (user.PendingEmail == null) throw new InvalidRequestException("User has not been pending email");
         if (user.EmailChangeTokenExpiry < DateTime.UtcNow) throw new TokenExpiredException("Token expired");
         
         user.Email = user.PendingEmail;

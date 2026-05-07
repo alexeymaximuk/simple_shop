@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\Shop.Users.props" />
-</Project>

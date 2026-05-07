@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shop.Shared.Exceptions;
 using Shop.Users.DTOs.Auth;
-using Shop.Users.Exceptions;
 
 namespace Shop.Users.Services;
 

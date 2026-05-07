@@ -1,10 +1,12 @@
 ﻿using Shop.Users.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shop.Shared.Exceptions;
+using Shop.Shared.Settings;
 using Shop.Users.Data;
 using Shop.Users.DTOs.Auth;
-using Shop.Users.Exceptions;
 using Shop.Users.Models;
+using Shop.Users.Settings;
 
 namespace Shop.Users.Services;
 

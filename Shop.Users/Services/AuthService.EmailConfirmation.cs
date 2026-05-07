@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shop.Users.Exceptions;
+using Shop.Shared.Exceptions;
 using Shop.Users.Models;
 
 namespace Shop.Users.Services;
@@ -24,7 +24,7 @@ public partial class AuthService
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
         if (user is null) throw new NotFoundException("User not found");
-        if (user.IsEmailConfirmed) throw new ValidationException("Email already confirmed");
+        if (user.IsEmailConfirmed) throw new InvalidRequestException("Email already confirmed");
         
         await SendEmailConfirmationAsync(user);
     }

@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Shared.Exceptions;
 using Shop.Users.DTOs.Auth;
 
 namespace Shop.Users.Controllers;
