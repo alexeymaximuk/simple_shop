@@ -56,7 +56,7 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
-# sencitive data
+# sensitive data
 **/appsettings.Development.json
 **/bin/
 **/obj/

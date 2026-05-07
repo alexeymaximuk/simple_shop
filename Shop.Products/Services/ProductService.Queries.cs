@@ -6,23 +6,35 @@ namespace Shop.Products.Services;
 
 public partial class ProductService
 {
-    public async Task<IEnumerable<ProductResponseDto>> GetAllProductsForUser(Guid userId)
+    public async Task<IEnumerable<ProductResponseDto>> GetAllProducts(
+        ProductFilterDto filter, bool showUnavailable = false
+    )
     {
-        var product = await dbContext.Products.Where(x => x.UserId == userId).Select(MapToResponseDto).ToListAsync();
-
-        return product;
-    }
-
-    public async Task<IEnumerable<ProductResponseDto>> GetAllProducts()
-    {
-        var product = await dbContext.Products.Select(MapToResponseDto).ToListAsync();
+        var query = dbContext.Products.Where(p => !p.IsDeleted).AsQueryable();
+        
+        if (filter.Name != null)
+            query = query.Where(x => x.Name.Contains(filter.Name));
+        
+        if (filter.UserId != null)
+            query = query.Where(x => x.UserId == filter.UserId);
+        
+        if (filter.MaxPrice != null)
+            query = query.Where(x => x.Price <= filter.MaxPrice);
+        
+        if (filter.MinPrice != null)
+            query = query.Where(x => x.Price >= filter.MinPrice);
+        
+        if (!showUnavailable)
+            query = query.Where(x => x.IsAvailable == true);
+        
+        var product = await query.Select(MapToResponseDto).ToListAsync();
 
         return product;
     }
 
     public async Task<ProductResponseDto> GetProductById(Guid productId)
     {
-        var product = await dbContext.Products.Where(x => x.Id == productId).Select(MapToResponseDto)
+        var product = await dbContext.Products.Where(x => x.Id == productId && !x.IsDeleted).Select(MapToResponseDto)
             .FirstOrDefaultAsync();
         if (product == null) throw new InvalidRequestException("Product is not found");
 

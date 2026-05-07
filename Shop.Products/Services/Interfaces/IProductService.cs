@@ -11,7 +11,6 @@ public interface IProductService
     Task DeactivateProduct(Guid productId, Guid userId);
     Task ActivateProduct(Guid productId, Guid userId);
 
-    Task<IEnumerable<ProductResponseDto>> GetAllProducts();
-    Task<IEnumerable<ProductResponseDto>> GetAllProductsForUser(Guid userId);
+    Task<IEnumerable<ProductResponseDto>> GetAllProducts(ProductFilterDto filter, bool showUnavailable = false);
     Task<ProductResponseDto> GetProductById(Guid productId);
 }

@@ -82,9 +82,9 @@ public partial class ProductsController(IProductService productService) : Contro
     }
     
     [HttpGet("all")]
-    public async Task<IActionResult> GetAllProducts()
+    public async Task<IActionResult> GetAllProducts(ProductFilterDto filter)
     {
-        var products = await productService.GetAllProducts();
+        var products = await productService.GetAllProducts(filter);
 
         return Ok(products);
     }
@@ -94,11 +94,13 @@ public partial class ProductsController(IProductService productService) : Contro
     public async Task<IActionResult> GetAllProductsForUser()
     {
         var userId = GetCurrentUserId();
+        var filter = new ProductFilterDto
+        {
+            UserId = userId
+        };
 
-        var products = await productService.GetAllProductsForUser(userId);
+        var products = await productService.GetAllProducts(filter, true);
 
         return Ok(products);
     }
-    
-    
 }
