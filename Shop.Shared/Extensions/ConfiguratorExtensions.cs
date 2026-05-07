@@ -8,7 +8,7 @@ public static class ConfiguratorExtensions
         where T : class
     {
         var section = configuration.GetSection(sectionName).Get<T>() 
-                      ?? throw new ValidationException($"Missing required setting: {sectionName}");
+                      ?? throw new InvalidOperationException($"Missing required setting: {sectionName}");
 
         return section;
     }

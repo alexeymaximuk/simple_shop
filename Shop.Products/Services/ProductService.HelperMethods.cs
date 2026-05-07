@@ -37,6 +37,9 @@ public partial class ProductService
         {
             Id = p.Id,
             Name = p.Name,
+            Price = p.Price,
+            CreateTime = p.CreatedAt,
+            UserId = p.UserId,
             Description = p.Description,
             IsDeleted = p.IsDeleted,
             IsActive = p.IsAvailable

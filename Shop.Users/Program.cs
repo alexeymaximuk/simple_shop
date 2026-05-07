@@ -17,6 +17,7 @@ using Shop.Users.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// debug
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -43,6 +44,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// mvc
 builder.Services.AddControllers();
 
 // validators
@@ -62,10 +64,17 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+// connections
+builder.Services.AddHttpClient<IProductServiceClient, ProductServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ProductsService:BaseUrl"]!);
+});
+
 builder.Services.AddDbContext<UsersDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+// jwt
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
         {

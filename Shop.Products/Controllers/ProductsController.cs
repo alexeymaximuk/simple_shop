@@ -27,17 +27,6 @@ public partial class ProductsController(IProductService productService) : Contro
     }
 
     [Authorize]
-    [HttpDelete("{productId}/delete")]
-    public async Task<IActionResult> DeleteProduct(Guid productId)
-    {
-        var userId = GetCurrentUserId();
-
-        await productService.DeleteProduct(productId, userId);
-        
-        return NoContent();
-    }
-
-    [Authorize]
     [HttpPut("{productId}")]
     public async Task<IActionResult> EditProduct(Guid productId, ProductChangeInfoDto dto, IValidator<ProductChangeInfoDto> validator)
     {
@@ -82,7 +71,7 @@ public partial class ProductsController(IProductService productService) : Contro
     }
     
     [HttpGet("all")]
-    public async Task<IActionResult> GetAllProducts(ProductFilterDto filter)
+    public async Task<IActionResult> GetAllProducts([FromQuery] ProductFilterDto filter)
     {
         var products = await productService.GetAllProducts(filter);
 
@@ -91,7 +80,7 @@ public partial class ProductsController(IProductService productService) : Contro
     
     [Authorize]
     [HttpGet("my-products")]
-    public async Task<IActionResult> GetAllProductsForUser()
+    public async Task<IActionResult> GetAllProductsForUser([FromQuery] bool showDeleted = false)
     {
         var userId = GetCurrentUserId();
         var filter = new ProductFilterDto
@@ -99,8 +88,30 @@ public partial class ProductsController(IProductService productService) : Contro
             UserId = userId
         };
 
-        var products = await productService.GetAllProducts(filter, true);
+        var products = await productService.GetAllProducts(filter, showDeleted);
 
         return Ok(products);
+    }
+
+    [HttpPost("users/{id}/deactivate")]
+    public async Task<IActionResult> DeactivateUser(Guid id)
+    {
+        await productService.SoftDeleteUserProducts(id);
+        return Ok();
+    }
+    
+    [HttpPost("users/{id}/reactivate")]
+    public async Task<IActionResult> ReactivateUser(Guid id)
+    {
+        await productService.RestoreUserProducts(id);
+        return Ok();
+    }
+    
+    
+    [HttpDelete("users/{0}/delete")]
+    public async Task<IActionResult> DeleteAllUserProducts(Guid id)
+    {
+        await productService.DeleteAllProductsForUser(id);
+        return NoContent();
     }
 }

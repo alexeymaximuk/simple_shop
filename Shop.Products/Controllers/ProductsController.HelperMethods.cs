@@ -5,7 +5,7 @@ namespace Shop.Products.Controllers;
 
 public partial class ProductsController
 {
-    public Guid GetCurrentUserId()
+    private Guid GetCurrentUserId()
     {
         var claim = User.FindFirstValue(ClaimTypes.NameIdentifier)
                     ?? throw new AuthorisationException("User not authorized");
