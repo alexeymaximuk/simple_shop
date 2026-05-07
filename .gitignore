@@ -55,4 +55,15 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
-Shop.Users/appsettings.Development.json
+
+# sencitive data
+**/appsettings.Development.json
+**/bin/
+**/obj/
+
+# Rider
+.idea/
+*.DotSettings.user
+
+# User secrets
+secrets.json
