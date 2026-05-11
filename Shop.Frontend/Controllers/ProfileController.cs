@@ -4,7 +4,7 @@ namespace Shop.Frontend.Controllers;
 
 public class ProfileController : Controller
 {
-    public IActionResult MyPurchases()
+    public IActionResult MyProducts()
     {
         return View();
     }

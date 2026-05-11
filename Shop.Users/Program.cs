@@ -16,6 +16,7 @@ using Shop.Users.Services.Interfaces;
 using Shop.Users.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCors();
 
 // debug
 builder.Services.AddSwaggerGen(options =>
@@ -91,6 +92,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         }
     );
 
+builder.Configuration.AddEnvironmentVariables();
+
 // app
 var app = builder.Build();
 
@@ -100,10 +103,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+else
+{
+    app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+}
+
+
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

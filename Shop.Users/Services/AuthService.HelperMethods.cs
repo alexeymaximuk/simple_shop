@@ -47,6 +47,9 @@ public partial class AuthService
     
     private string GenerateToken()
     {
-        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64))
+            .Replace("+", "-")
+            .Replace("/", "_")
+            .Replace("=", "");;
     }
 }

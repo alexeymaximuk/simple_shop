@@ -84,7 +84,6 @@ public partial class UserController
     /// GET api/users — returns all users
     /// </summary>
     /// <returns></returns>
-    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {

@@ -1,0 +1,77 @@
+﻿services:
+  mailpit:
+    image: axllent/mailpit
+    container_name: shop-mailpit
+    ports:
+      - "1026:1025"
+      - "8025:8025"
+    networks:
+      - shop-network
+
+  shop.frontend:
+    image: shop.frontend
+    build:
+      context: .
+      dockerfile: Shop.Frontend/Dockerfile
+    ports:
+      - 8082:8080
+    depends_on:
+      - shop.users
+      - shop.products
+    networks:
+      - shop-network
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - shop-network
+
+  shop.products:
+    image: shop.products
+    build:
+      context: .
+      dockerfile: Shop.Products/Dockerfile
+    ports:
+      - 8081:8080
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${PRODUCTS_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres
+    networks:
+      - shop-network
+
+  shop.users:
+    image: shop.users
+    build:
+      context: .
+      dockerfile: Shop.Users/Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${USERS_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - Email__Host=mailpit
+      - Email__Port=1025
+      - App__BaseUrl=${APP_BASE_URL}
+      - App__EmailFrom=${APP_EMAIL_FROM}
+    depends_on:
+      - postgres
+      - mailpit
+    networks:
+      - shop-network
+
+networks:
+  shop-network:
+    driver: bridge
+volumes:
+  postgres_data:

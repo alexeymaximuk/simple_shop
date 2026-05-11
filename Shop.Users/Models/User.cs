@@ -30,7 +30,7 @@ public class User
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// For now there are only 2 possible roles, Default and Admin
+    /// For now there are only 1 possible role, User
     /// </summary>
     [MaxLength(256)]
     public string Role { get; set; } = "User";

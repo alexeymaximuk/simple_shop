@@ -13,6 +13,7 @@ using Shop.Shared.Middleware;
 using Shop.Shared.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCors();
 
 // debug
 builder.Services.AddSwaggerGen(options =>
@@ -81,11 +82,18 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 }
 
 app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ProductsDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

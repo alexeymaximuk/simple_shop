@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shop.Shared.Constants;
 using Shop.Shared.Exceptions;
 using Shop.Users.DTOs.Auth;
 
