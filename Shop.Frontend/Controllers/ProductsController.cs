@@ -5,10 +5,11 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Frontend.Constants;
 using Shop.Frontend.Models;
+using Shop.Shared.Controllers;
 
 namespace Shop.Frontend.Controllers;
 
-public class ProductsController(IHttpClientFactory httpClientFactory) : Controller
+public class ProductsController(IHttpClientFactory httpClientFactory) : BaseController
 {
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -73,8 +74,9 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : Controll
             TempData["Message"] = "Product created.";
             return RedirectToAction("MyProducts");
         }
-
-        ModelState.AddModelError("", "Failed to create product.");
+        
+        await AddApiErrors(response);
+        
         return View(model);
     }
 
@@ -84,7 +86,11 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : Controll
         var client = httpClientFactory.CreateClient(ApiClients.Products);
         var response = await client.GetAsync($"/api/products/{id}");
 
-        if (!response.IsSuccessStatusCode) return RedirectToAction("MyProducts");
+        if (!response.IsSuccessStatusCode)
+        {
+            TempData["Error"] = "Failed to load product.";
+            return RedirectToAction("MyProducts");
+        }
 
         var json = await response.Content.ReadAsStringAsync();
         var product = JsonSerializer.Deserialize<ProductViewModel>(json, _jsonOptions)!;
@@ -114,8 +120,9 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : Controll
             TempData["Message"] = "Product updated.";
             return RedirectToAction("MyProducts");
         }
-
-        ModelState.AddModelError("", "Failed to update product.");
+        
+        await AddApiErrors(response);
+        
         return View(model);
     }
 

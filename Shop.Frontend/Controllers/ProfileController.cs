@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Frontend.Constants;
 using Shop.Frontend.Models;
+using Shop.Shared.Controllers;
 
 namespace Shop.Frontend.Controllers;
 
-public class ProfileController(IHttpClientFactory httpClientFactory) : Controller
+public class ProfileController(IHttpClientFactory httpClientFactory) : BaseController
 {
     public IActionResult MyProducts()
     {
@@ -39,7 +40,10 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : Controlle
         if (response.IsSuccessStatusCode)
             TempData["Message"] = "Name updated successfully.";
         else
-            TempData["Error"] = "Failed to update name.";
+        {
+            await AddApiErrors(response);
+            return View("Index", model);
+        }
 
         return RedirectToAction("Index");
     }
@@ -63,7 +67,10 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : Controlle
         if (response.IsSuccessStatusCode)
             TempData["Message"] = "Confirmation sent to your new email.";
         else
-            TempData["Error"] = "Failed to request email change.";
+        {
+            await AddApiErrors(response);
+            return View("Index", model);
+        }
 
         return RedirectToAction("Index");
     }
@@ -80,6 +87,7 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : Controlle
         await client.PostAsync($"/api/users/{userId}/deactivate", null);
 
         HttpContext.Session.Clear();
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
 

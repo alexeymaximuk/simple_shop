@@ -1,5 +1,6 @@
 ﻿using Shop.Users.DTOs;
-using Shop.Users.Models;
+
+namespace Shop.Users.Services.Interfaces;
 
 public interface IUserService
 {
@@ -9,4 +10,5 @@ public interface IUserService
     Task DeleteAsync(Guid id);
     Task DeactivateAsync(Guid id);
     Task ActivateAsync(Guid id);
+    Task DeleteSelf(string? userId);
 }

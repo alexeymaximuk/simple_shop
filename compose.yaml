@@ -65,6 +65,10 @@
       - App__BaseUrl=${APP_BASE_URL}
       - App__EmailFrom=${APP_EMAIL_FROM}
       - ProductsService__BaseUrl=${PRODUCTS_API_URL}
+      - Admin__AdminEmail=${ADMIN_EMAIL}
+      - Admin__AdminRole=${ADMIN_ROLE}
+      - Admin__AdminPassword=${ADMIN_PASSWORD}
+      - Admin__AdminName=${ADMIN_NAME}
     depends_on:
       - postgres
       - mailpit

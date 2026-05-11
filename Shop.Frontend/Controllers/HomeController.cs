@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Shop.Shared.Controllers;
 
 namespace Shop.Frontend.Controllers;
 
-public class HomeController : Controller
+public class HomeController : BaseController
 {
     public IActionResult Index()
     {

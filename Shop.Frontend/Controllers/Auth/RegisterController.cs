@@ -3,10 +3,11 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Frontend.Constants;
 using Shop.Frontend.Models;
+using Shop.Shared.Controllers;
 
 namespace Shop.Frontend.Controllers.Auth;
 
-public class RegisterController(IHttpClientFactory httpClientFactory) : Controller
+public class RegisterController(IHttpClientFactory httpClientFactory) : BaseController
 {
     [HttpGet]
     public IActionResult Register()
@@ -33,7 +34,7 @@ public class RegisterController(IHttpClientFactory httpClientFactory) : Controll
             return RedirectToAction("Login", "Login");
         }
             
-        ModelState.AddModelError("", "Invalid registration attempt");
+        await AddApiErrors(response);
             
         return View(model);
     }

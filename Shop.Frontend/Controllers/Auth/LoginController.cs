@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Frontend.Constants;
 using Shop.Frontend.Models;
+using Shop.Shared.Controllers;
 
 namespace Shop.Frontend.Controllers.Auth;
 
-public class LoginController(IHttpClientFactory httpClientFactory) : Controller
+public class LoginController(IHttpClientFactory httpClientFactory) : BaseController
 {
     [HttpGet]
     public IActionResult Login()
@@ -47,8 +48,8 @@ public class LoginController(IHttpClientFactory httpClientFactory) : Controller
             
             return RedirectToAction("Index", "Products");
         }
-        
-        ModelState.AddModelError("", "Invalid login attempt");
+
+        await AddApiErrors(response);
         
         return View(model);
     }

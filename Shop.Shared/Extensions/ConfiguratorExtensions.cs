@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Shop.Shared.Extensions;
+﻿namespace Shop.Shared.Extensions;
 
 public static class ConfiguratorExtensions
 {

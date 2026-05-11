@@ -16,6 +16,14 @@ public partial class UserService (UsersDbContext dbContext, IProductServiceClien
         user.Name = dto.Name;
     }
     
+    public async Task DeleteSelf(string? userIdString)
+    {
+        if (userIdString == null) throw new AuthorisationException("Cant get userId from current authorised user");
+        var userId = Guid.Parse(userIdString);
+
+        await DeleteAsync(userId);
+    }
+    
     public async Task DeleteAsync(Guid id)
     {
         var user = await dbContext.Users.FindAsync(id);

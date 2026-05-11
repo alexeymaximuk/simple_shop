@@ -3,10 +3,11 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Frontend.Constants;
 using Shop.Frontend.Models;
+using Shop.Shared.Controllers;
 
 namespace Shop.Frontend.Controllers.Auth;
 
-public class PasswordController(IHttpClientFactory httpClientFactory) : Controller
+public class PasswordController(IHttpClientFactory httpClientFactory) : BaseController
 {
     [HttpGet]
     public IActionResult ForgotPassword()
@@ -47,7 +48,8 @@ public class PasswordController(IHttpClientFactory httpClientFactory) : Controll
             return RedirectToAction("Login", "Login");
         }
         
-        ModelState.AddModelError("", "Invalid reset password attempt");
+        await AddApiErrors(response);
+        
         return View(model);
     }
 }

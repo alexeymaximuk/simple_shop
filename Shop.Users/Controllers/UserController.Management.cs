@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Security.Claims;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Users.DTOs;
@@ -13,6 +14,19 @@ public partial class UserController
     /// <param name="id"></param>
     /// <returns></returns>
     [Authorize]
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteCurrentUser()
+    {
+        await userService.DeleteSelf(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        return NoContent();
+    }
+    
+    /// <summary>
+    /// DELETE api/users/{id} — permanently removes user from database
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
@@ -25,7 +39,7 @@ public partial class UserController
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id}/deactivate")]
     public async Task<IActionResult> DeactivateUser(Guid id)
     {
@@ -38,7 +52,7 @@ public partial class UserController
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id}/activate")]
     public async Task<IActionResult> ActivateUser(Guid id)
     {
@@ -84,6 +98,7 @@ public partial class UserController
     /// GET api/users — returns all users
     /// </summary>
     /// <returns></returns>
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {

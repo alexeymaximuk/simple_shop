@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using Shop.Shared.Extensions;
 using Shop.Shared.Middleware;
 using Shop.Shared.Settings;
+using Shop.Users.Data.Seed;
 using Shop.Users.DTOs.Validators;
 using Shop.Users.Services.Interfaces;
 using Shop.Users.Settings;
@@ -121,6 +122,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
     db.Database.Migrate();
+    
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+    
+    await AdminSeeder.SeedAsync(db, passwordHasher, config);
 }
 
 app.Run();

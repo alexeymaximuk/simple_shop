@@ -3,10 +3,11 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Frontend.Constants;
 using Shop.Frontend.Models;
+using Shop.Shared.Controllers;
 
 namespace Shop.Frontend.Controllers.Auth;
 
-public class EmailController(IHttpClientFactory httpClientFactory) : Controller
+public class EmailController(IHttpClientFactory httpClientFactory) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> ConfirmEmail(string token)
@@ -15,7 +16,15 @@ public class EmailController(IHttpClientFactory httpClientFactory) : Controller
         var encodedToken = Uri.EscapeDataString(token);
         var response = await client.GetAsync($"/api/users/confirm-email?token={encodedToken}");
         
-        return View(response.IsSuccessStatusCode ? "ConfirmEmailSuccess" : "ConfirmEmailError");
+        if (response.IsSuccessStatusCode)
+        {
+            return View("ConfirmEmailSuccess");
+        }
+        else
+        {
+            await AddApiErrors(response);
+            return View("ConfirmEmailError");
+        }
     }
     
     [HttpGet]
@@ -24,8 +33,16 @@ public class EmailController(IHttpClientFactory httpClientFactory) : Controller
         var client = httpClientFactory.CreateClient(ApiClients.Users);
         var encodedToken = Uri.EscapeDataString(token);
         var response = await client.GetAsync($"/api/users/confirm-email-change?token={encodedToken}");
-
-        return View(response.IsSuccessStatusCode ? "ConfirmEmailSuccess" : "ConfirmEmailError");
+        
+        if (response.IsSuccessStatusCode)
+        {
+            return View("ConfirmEmailSuccess");
+        }
+        else
+        {
+            await AddApiErrors(response);
+            return View("ConfirmEmailError");
+        }
     }
     
     [HttpGet]
