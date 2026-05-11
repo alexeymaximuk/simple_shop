@@ -2,11 +2,12 @@
 
 public class ProductViewModel
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
-    public string Description { get; set; }
     public decimal Price { get; set; }
+    public string Description { get; set; }
+    public Guid UserId { get; set; }
+    public DateTime CreateTime { get; set; }
     public bool IsActive { get; set; }
-    public int UserId { get; set; }
-    public DateTime CreateDate { get; set; }
+    public bool IsDeleted { get; set; }
 }

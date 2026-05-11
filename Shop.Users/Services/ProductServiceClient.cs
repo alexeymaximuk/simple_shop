@@ -21,8 +21,8 @@ public class ProductServiceClient(HttpClient httpClient) : IProductServiceClient
 
     public async Task DeleteUserProducts(Guid userId)
     {
-        var response = await httpClient.PostAsync(
-            string.Format(ProductsServiceRoutes.DeleteUserProducts, userId), null
+        var response = await httpClient.DeleteAsync(
+            string.Format(ProductsServiceRoutes.DeleteUserProducts, userId)
         );
         
         response.EnsureSuccessStatusCode();

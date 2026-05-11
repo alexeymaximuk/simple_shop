@@ -64,6 +64,7 @@
       - Email__Port=1025
       - App__BaseUrl=${APP_BASE_URL}
       - App__EmailFrom=${APP_EMAIL_FROM}
+      - ProductsService__BaseUrl=${PRODUCTS_API_URL}
     depends_on:
       - postgres
       - mailpit

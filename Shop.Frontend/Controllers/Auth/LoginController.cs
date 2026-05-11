@@ -4,12 +4,12 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Shop.Frontend.Models;
 using Shop.Frontend.Constants;
+using Shop.Frontend.Models;
 
-namespace Shop.Frontend.Controllers;
+namespace Shop.Frontend.Controllers.Auth;
 
-public class AuthController (IHttpClientFactory httpClientFactory) : Controller
+public class LoginController(IHttpClientFactory httpClientFactory) : Controller
 {
     [HttpGet]
     public IActionResult Login()
@@ -52,46 +52,4 @@ public class AuthController (IHttpClientFactory httpClientFactory) : Controller
         
         return View(model);
     }
-
-
-    [HttpGet]
-    public IActionResult Register()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Register(RegisterViewModel model)
-    {
-        if (!ModelState.IsValid)
-            return View(model);
-            
-        var client = httpClientFactory.CreateClient(ApiClients.Users);
-        var json = JsonSerializer.Serialize(model);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-            
-        var response = await client.PostAsync("/api/users/register", content);
-
-        if (response.IsSuccessStatusCode)
-        {
-            TempData["Message"] = "success";
-                
-            return RedirectToAction("Login");
-        }
-            
-        ModelState.AddModelError("", "Invalid registration attempt");
-            
-        return View(model);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> ConfirmEmail(string token)
-    {
-        var client = httpClientFactory.CreateClient(ApiClients.Users);
-        var encodedToken = Uri.EscapeDataString(token);
-        var response = await client.GetAsync($"/api/users/confirm-email?token={encodedToken}");
-        
-        return View(response.IsSuccessStatusCode ? "ConfirmEmailSuccess" : "ConfirmEmailError");
-    }
-    
 }

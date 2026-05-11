@@ -63,6 +63,6 @@ public partial class ProductService
     {
         await dbContext.Products
             .Where(p => p.UserId == userId)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDeleted, false));
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDeleted, true));
     }
 }

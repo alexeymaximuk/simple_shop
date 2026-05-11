@@ -6,7 +6,6 @@
     <title>@ViewData["Title"] - Shop</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Shop.Frontend.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -20,18 +19,38 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Login">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index">All products</a>
+                            <a class="nav-link text-dark" asp-controller="Products" asp-action="Index">All products</a>
                         </li>
                         @if (User.IsInRole("User"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="MyProducts">My products</a>
+                                <a class="nav-link text-dark" asp-controller="Products" asp-action="MyProducts">My products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">My Profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Products" asp-action="Create">+ New Product</a>
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    <button type="submit" class="nav-link text-dark btn btn-link p-0">Logout</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Login" asp-action="Login">Login</a>
                             </li>
                         }
                     </ul>
@@ -39,7 +58,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container flex-grow-1 d-flex flex-column">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

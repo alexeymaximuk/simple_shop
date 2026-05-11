@@ -1,0 +1,74 @@
+﻿@model List<Shop.Frontend.Models.ProductViewModel>
+@{ ViewData["Title"] = "My Products"; }
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>My Products</h2>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-primary">+ New Product</a>
+            <a asp-action="MyProducts" asp-route-showDeleted="@(!(bool)ViewBag.ShowDeleted)"
+               class="btn btn-primary btn-outline-secondary">
+                @((bool)ViewBag.ShowDeleted ? "Hide Deleted" : "Show Deleted")
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">No products yet.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr class="@(!p.IsActive ? "table-warning" : "") @(p.IsDeleted ? "table-danger" : "")">
+                        <td>@p.Name</td>
+                        <td>@p.Price.ToString("0.00")₷</td>
+                        <td>
+                            @if (p.IsDeleted) { <span class="badge bg-danger">Deleted</span> }
+                            else if (!p.IsActive) { <span class="badge bg-warning text-dark">Inactive</span> }
+                            else { <span class="badge bg-success">Active</span> }
+                        </td>
+                        <td>@p.CreateTime.ToString("yyyy-MM-dd")</td>
+                        <td class="text-end">
+                            @if (!p.IsDeleted)
+                            {
+                                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                @if (p.IsActive)
+                                {
+                                    <form asp-action="Deactivate" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-warning">Deactivate</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Activate" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Activate</button>
+                                    </form>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

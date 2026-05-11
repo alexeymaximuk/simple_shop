@@ -1,12 +1,11 @@
-﻿@model Shop.Frontend.Models.LoginViewModel
+﻿@model Shop.Frontend.Models.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Register";
 }
-
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
-        <h2>Login</h2>
+        <h2>Register</h2>
         
         @if (TempData["Message"] != null)
         {
@@ -15,10 +14,16 @@
             </div>
         }
         
-        <form asp-action="Login" method="Post">
+        <form asp-controller="Register" asp-action="Register" method="Post">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             
             <div class="form-group mb-3">
+                <label asp-for="Name">Name</label>
+                <input asp-for="Name" class="form-control" type="text" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            
+            <div class="from-group mb-3">
                 <label asp-for="Email">Email</label>
                 <input asp-for="Email" class="form-control" type="email" required />
                 <span asp-validation-for="Email" class="text-danger"></span>
@@ -30,11 +35,11 @@
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
         
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button type="submit" class="btn btn-primary w-100">Register</button>
         </form>
         
         <p class="mt-3 text-center">
-            Don't have an account? <a asp-action="Register">Register here</a>
+            Already have an account? <a asp-controller="Login" asp-action="Login">Login here</a>
         </p>
     </div>
 </div>

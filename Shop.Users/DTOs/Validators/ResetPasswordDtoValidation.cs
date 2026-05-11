@@ -7,6 +7,6 @@ public class ResetPasswordDtoValidator : AbstractValidator<ResetPasswordDto>
 {
     public ResetPasswordDtoValidator()
     {
-        RuleFor(x => x.NewPassword).ValidPassword();
+        RuleFor(x => x.Password).ValidPassword();
     }
 }

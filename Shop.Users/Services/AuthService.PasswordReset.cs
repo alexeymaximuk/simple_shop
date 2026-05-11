@@ -36,7 +36,7 @@ public partial class AuthService
         user.PasswordResetToken = null;
         user.PasswordResetTokenExpiry = null;
 
-        var newPasswordHash = passwordHasher.HashPassword(user, dto.NewPassword);
+        var newPasswordHash = passwordHasher.HashPassword(user, dto.Password);
         user.PasswordHash = newPasswordHash;
         await dbContext.SaveChangesAsync();
 
