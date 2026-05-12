@@ -4,9 +4,9 @@ using Shop.Products.DTOs;
 namespace Shop.Products.Services.Interfaces;
 
 public interface IProductService
-{ 
-    Task CreateProduct(Guid userId, ProductCreateDto dto);
-    Task EditProduct(Guid productId, Guid userId, ProductChangeInfoDto dto);
+{
+    Task<Guid> CreateProduct(Guid userId, ProductInfoDto dto);
+    Task EditProduct(Guid productId, Guid userId, ProductInfoDto dto);
     Task DeactivateProduct(Guid productId, Guid userId);
     Task ActivateProduct(Guid productId, Guid userId);
 

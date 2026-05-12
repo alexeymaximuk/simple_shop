@@ -25,7 +25,7 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : BaseCont
     public async Task<IActionResult> Index(ProductFilterViewModel filter)
     {
         var client = httpClientFactory.CreateClient(ApiClients.Products);
-        var query = $"/api/products/all?Name={filter.Name}&MinPrice={filter.MinPrice}&MaxPrice={filter.MaxPrice}";
+        var query = $"products/all?Name={filter.Name}&MinPrice={filter.MinPrice}&MaxPrice={filter.MaxPrice}";
         var response = await client.GetAsync(query);
 
         var products = new List<ProductViewModel>();
@@ -43,7 +43,7 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : BaseCont
     public async Task<IActionResult> MyProducts(bool showDeleted = false)
     {
         var client = AuthorizedClient();
-        var response = await client.GetAsync($"/api/products/my-products?showDeleted={showDeleted}");
+        var response = await client.GetAsync($"products/my-products?showDeleted={showDeleted}");
 
         var products = new List<ProductViewModel>();
         if (response.IsSuccessStatusCode)
@@ -67,7 +67,7 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : BaseCont
         var client = AuthorizedClient();
         var json = JsonSerializer.Serialize(new { model.Name, model.Description, model.Price });
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("/api/products", content);
+        var response = await client.PostAsync("products", content);
         
         if (response.IsSuccessStatusCode)
         {
@@ -84,7 +84,7 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : BaseCont
     public async Task<IActionResult> Edit(Guid id)
     {
         var client = httpClientFactory.CreateClient(ApiClients.Products);
-        var response = await client.GetAsync($"/api/products/{id}");
+        var response = await client.GetAsync($"products/{id}");
 
         if (!response.IsSuccessStatusCode)
         {
@@ -113,7 +113,7 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : BaseCont
         var json = JsonSerializer.Serialize(new { model.Name, model.Description, model.Price });
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await client.PutAsync($"/api/products/{model.Id}", content);
+        var response = await client.PutAsync($"products/{model.Id}", content);
 
         if (response.IsSuccessStatusCode)
         {
@@ -130,7 +130,7 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : BaseCont
     public async Task<IActionResult> Deactivate(Guid id)
     {
         var client = AuthorizedClient();
-        await client.PostAsync($"/api/products/{id}/deactivate", null);
+        await client.PostAsync($"products/{id}/deactivate", null);
         return RedirectToAction("MyProducts");
     }
 
@@ -138,7 +138,7 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : BaseCont
     public async Task<IActionResult> Activate(Guid id)
     {
         var client = AuthorizedClient();
-        await client.PostAsync($"/api/products/{id}/activate", null);
+        await client.PostAsync($"products/{id}/activate", null);
         return RedirectToAction("MyProducts");
     }
 }

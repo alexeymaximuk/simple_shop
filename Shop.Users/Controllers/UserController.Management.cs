@@ -61,21 +61,21 @@ public partial class UserController
     }
     
     /// <summary>
-    /// PATCH api/users/{id}/change-name — updates display name of existing user
+    /// PATCH api/users/me/change-name — updates display name of existing user
     /// </summary>
-    /// <param name="id"></param>
     /// <param name="dto"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
     [Authorize]
-    [HttpPatch("{id}/change-name")]
-    public async Task<IActionResult> EditUserUsername(Guid id, UpdateUsernameDto dto, IValidator<UpdateUsernameDto> validator)
+    [HttpPatch("me/change-name")]
+    public async Task<IActionResult> EditUserUsername(UpdateUsernameDto dto, IValidator<UpdateUsernameDto> validator)
     {
         var validationResult = await validator.ValidateAsync(dto);
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
         
-        await userService.UpdateUsernameAsync(id, dto);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        await userService.UpdateUsernameAsync(Guid.Parse(userId!), dto);
         return Ok();
     }
     

@@ -7,7 +7,7 @@ namespace Shop.Products.Services;
 
 public partial class ProductService
 {
-    private Product CreateProduct(ProductCreateDto dto, Guid pserId)
+    private Product CreateProduct(ProductInfoDto dto, Guid userId)
     {
         var product = new Product
         {
@@ -16,21 +16,20 @@ public partial class ProductService
             Description = dto.Description,
             Price = dto.Price,
             IsAvailable = true,
-            UserId = pserId,
+            UserId = userId,
             CreatedAt = DateTime.UtcNow
         };
         return product;
     }
 
-    private async Task<Product> FetchProduct(Guid productId, Guid pserId)
+    private async Task<Product> FetchProduct(Guid productId, Guid userId)
     {
         var product = await dbContext.Products.FindAsync(productId);
         if (product == null) throw new NotFoundException("Product not found");
-        if (product.UserId != pserId) throw new ForbiddenException("Access denied");
+        if (product.UserId != userId) throw new ForbiddenException("Access denied");
         
         return product;
     }
-    
     
     private static Expression<Func<Product,ProductResponseDto>> MapToResponseDto => 
         p => new ProductResponseDto

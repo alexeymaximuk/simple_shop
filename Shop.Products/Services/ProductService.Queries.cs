@@ -13,7 +13,7 @@ public partial class ProductService
         var query = dbContext.Products.Where(p => !p.IsDeleted).AsQueryable();
         
         if (filter.Name != null)
-            query = query.Where(x => x.Name.ToUpper().Contains(filter.Name.ToUpper()));
+            query = query.Where(x => EF.Functions.ILike(x.Name, $"%{filter.Name}%"));
         
         if (filter.UserId != null)
             query = query.Where(x => x.UserId == filter.UserId);

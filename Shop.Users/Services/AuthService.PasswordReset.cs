@@ -10,9 +10,9 @@ public partial class AuthService
     public async Task ChangePasswordRequestAsync(ResetPasswordRequestDto dto)
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
-        if (user == null) throw new NotFoundException("User with that id not found");
+        if (user == null) throw new NotFoundException("User with that email not found");
 
-        var passwordResetToken = Guid.NewGuid().ToString();
+        var passwordResetToken = GenerateToken();
         user.PasswordResetToken = passwordResetToken;
         user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(AuthConstants.ResetPasswordTokenExpiryHours);
         await dbContext.SaveChangesAsync();

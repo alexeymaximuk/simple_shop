@@ -18,33 +18,42 @@ using Shop.Users.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
+builder.Configuration.AddEnvironmentVariables();
 
 // debug
-builder.Services.AddSwaggerGen(options =>
+if (builder.Environment.IsDevelopment())
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+    builder.Services.AddSwaggerGen(options =>
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
+            options.AddSecurityDefinition(
+                "Bearer", new OpenApiSecurityScheme
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header
                 }
-            },
-            []
+            );
+            options.AddSecurityRequirement(
+                new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        []
+                    }
+                }
+            );
         }
-    });
-});
+    );
+}
 
 // mvc
 builder.Services.AddControllers();
@@ -70,6 +79,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHttpClient<IProductServiceClient, ProductServiceClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ProductsService:BaseUrl"]!);
+    client.DefaultRequestHeaders.Add("X-Internal-Key", builder.Configuration["InternalApiKey"]);
 });
 
 builder.Services.AddDbContext<UsersDbContext>(options =>
@@ -93,7 +103,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         }
     );
 
-builder.Configuration.AddEnvironmentVariables();
 
 // app
 var app = builder.Build();

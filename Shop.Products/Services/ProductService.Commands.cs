@@ -6,15 +6,15 @@ namespace Shop.Products.Services;
 
 public partial class ProductService
 {
-    public async Task CreateProduct(Guid userId, ProductCreateDto dto)
+    public async Task<Guid> CreateProduct(Guid userId, ProductInfoDto dto)
     {
         var product = CreateProduct(dto, userId);
         dbContext.Products.Add(product);
-        
         await dbContext.SaveChangesAsync();
+        return product.Id;
     }
     
-    public async Task EditProduct(Guid productId, Guid userId, ProductChangeInfoDto dto)
+    public async Task EditProduct(Guid productId, Guid userId, ProductInfoDto dto)
     {
         var product = await FetchProduct(productId, userId);
 
@@ -63,6 +63,6 @@ public partial class ProductService
     {
         await dbContext.Products
             .Where(p => p.UserId == userId)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDeleted, true));
+            .ExecuteDeleteAsync();
     }
 }

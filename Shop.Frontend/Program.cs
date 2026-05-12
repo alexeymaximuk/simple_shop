@@ -8,12 +8,12 @@ builder.Services.AddCors();
 
 builder.Services.AddHttpClient(ApiClients.Users, client =>
 {
-    client.BaseAddress = new Uri("http://shop.users:8080/api/");
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:UsersAPI"]!);
 });
 
 builder.Services.AddHttpClient(ApiClients.Products, client =>
 {
-    client.BaseAddress = new Uri("http://shop.products:8080/api/");
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:ProductsAPI"]!);
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
@@ -38,7 +38,10 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 
-app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

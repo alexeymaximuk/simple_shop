@@ -27,7 +27,6 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : BaseContr
         if (!ModelState.IsValid) return View("Index", model);
 
         var token = HttpContext.Session.GetString("JwtToken");
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var client = httpClientFactory.CreateClient(ApiClients.Users);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -35,7 +34,7 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : BaseContr
         var json = JsonSerializer.Serialize(new { name = model.Name });
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await client.PatchAsync($"users/{userId}/change-name", content);
+        var response = await client.PatchAsync("users/me/change-name", content);
 
         if (response.IsSuccessStatusCode)
             TempData["Message"] = "Name updated successfully.";
@@ -54,7 +53,6 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : BaseContr
         if (!ModelState.IsValid) return View("Index", model);
 
         var token = HttpContext.Session.GetString("JwtToken");
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var client = httpClientFactory.CreateClient(ApiClients.Users);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -62,7 +60,7 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : BaseContr
         var json = JsonSerializer.Serialize(new { newEmail = model.NewEmail });
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await client.PostAsync($"users/{userId}/change-email", content);
+        var response = await client.PostAsync("users/me/change-email", content);
 
         if (response.IsSuccessStatusCode)
             TempData["Message"] = "Confirmation sent to your new email.";
@@ -73,22 +71,6 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : BaseContr
         }
 
         return RedirectToAction("Index");
-    }
-    
-    [HttpPost]
-    public async Task<IActionResult> Deactivate()
-    {
-        var token = HttpContext.Session.GetString("JwtToken");
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var client = httpClientFactory.CreateClient(ApiClients.Users);
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        await client.PostAsync($"/api/users/{userId}/deactivate", null);
-
-        HttpContext.Session.Clear();
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return RedirectToAction("Index", "Home");
     }
 
     [HttpPost]

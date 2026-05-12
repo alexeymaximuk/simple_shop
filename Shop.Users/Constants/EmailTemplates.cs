@@ -17,7 +17,7 @@ public class EmailTemplates
     public static string ResetPassword(string link) =>
         $"""
          <h1>Reset your password</h1>
-         <p>Click the link below to reset your password. Link expires in 30 minutes.</p>
+         <p>Click the link below to reset your password. Link expires in 300 minutes.</p>
          <a href='{link}'>Reset Password</a>
          """;
 

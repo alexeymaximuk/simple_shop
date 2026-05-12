@@ -10,6 +10,9 @@
 
   shop.frontend:
     image: shop.frontend
+    environment:
+      - ApiSettings__UsersAPI=${USERS_API_URL}
+      - ApiSettings__ProductsAPI=${PRODUCTS_API_URL}
     build:
       context: .
       dockerfile: Shop.Frontend/Dockerfile
@@ -48,6 +51,11 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - JwtSettings__Key=${JWT_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__TokenDuration=${JWT_TOKEN_DURATION}
+      - InternalApiKey=${INTERNAL_API_KEY}
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=${PRODUCTS_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
@@ -75,6 +83,11 @@
       - Admin__AdminRole=${ADMIN_ROLE}
       - Admin__AdminPassword=${ADMIN_PASSWORD}
       - Admin__AdminName=${ADMIN_NAME}
+      - JwtSettings__Key=${JWT_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__TokenDuration=${JWT_TOKEN_DURATION}
+      - InternalApiKey=${INTERNAL_API_KEY}
     depends_on:
       mailpit:
         condition: service_started

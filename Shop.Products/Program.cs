@@ -16,31 +16,39 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 
 // debug
-builder.Services.AddSwaggerGen(options =>
+if (builder.Environment.IsDevelopment())
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+    builder.Services.AddSwaggerGen(options =>
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
+            options.AddSecurityDefinition(
+                "Bearer", new OpenApiSecurityScheme
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header
                 }
-            },
-            []
+            );
+            options.AddSecurityRequirement(
+                new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        []
+                    }
+                }
+            );
         }
-    });
-});
+    );
+}
 
 // database
 builder.Services.AddDbContext<ProductsDbContext>(options =>
@@ -50,7 +58,7 @@ builder.Services.AddDbContext<ProductsDbContext>(options =>
 builder.Services.AddControllers();
 
 // validators
-builder.Services.AddValidatorsFromAssemblyContaining<ProductChangeInfoDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ProductInfoDtoValidator>();
 
 // DI
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -88,7 +96,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
+
 
 using (var scope = app.Services.CreateScope())
 {

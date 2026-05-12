@@ -1,6 +1,4 @@
-﻿using Microsoft.IdentityModel.JsonWebTokens;
-using Shop.Users.DTOs;
-using Shop.Users.DTOs.Auth;
+﻿using Shop.Users.DTOs.Auth;
 
 namespace Shop.Users.Services.Interfaces;
 
@@ -14,7 +12,6 @@ public interface IAuthService
 
     
     // email confirmation
-    
     Task ConfirmEmailAsync(string code);
     Task ChangeEmailRequestAsync(Guid id, ChangeEmailRequestDto dto);
     Task ChangeEmailConfirmAsync(string token);

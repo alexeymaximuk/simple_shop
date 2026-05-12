@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shop.Products.DTOs;
 using Shop.Products.Services.Interfaces;
 using Shop.Shared.Exceptions;
+using Shop.Shared.Middleware;
 
 namespace Shop.Products.Controllers;
 
@@ -14,21 +15,20 @@ public partial class ProductsController(IProductService productService) : Contro
 {
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> AddNewProduct(ProductCreateDto dto, IValidator<ProductCreateDto> validator)
+    public async Task<IActionResult> AddNewProduct(ProductInfoDto dto, IValidator<ProductInfoDto> validator)
     {
         var validationResult = await validator.ValidateAsync(dto);
         if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
 
         var userId = GetCurrentUserId();
         
-        await productService.CreateProduct(userId, dto);
-        
-        return Ok();
+        var id = await productService.CreateProduct(userId, dto);
+        return CreatedAtAction(nameof(GetProduct), new { productId = id }, null);
     }
 
     [Authorize]
     [HttpPut("{productId}")]
-    public async Task<IActionResult> EditProduct(Guid productId, ProductChangeInfoDto dto, IValidator<ProductChangeInfoDto> validator)
+    public async Task<IActionResult> EditProduct(Guid productId, ProductInfoDto dto, IValidator<ProductInfoDto> validator)
     {
         var validationResult = await validator.ValidateAsync(dto);
         if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
@@ -93,6 +93,7 @@ public partial class ProductsController(IProductService productService) : Contro
         return Ok(products);
     }
 
+    [InternalApiKey]
     [HttpPost("users/{id}/deactivate")]
     public async Task<IActionResult> DeactivateUser(Guid id)
     {
@@ -100,6 +101,7 @@ public partial class ProductsController(IProductService productService) : Contro
         return Ok();
     }
     
+    [InternalApiKey]
     [HttpPost("users/{id}/reactivate")]
     public async Task<IActionResult> ReactivateUser(Guid id)
     {
@@ -107,6 +109,7 @@ public partial class ProductsController(IProductService productService) : Contro
         return Ok();
     }
     
+    [InternalApiKey]
     [HttpDelete("users/{id}/delete")]
     public async Task<IActionResult> DeleteAllUserProducts(Guid id)
     {

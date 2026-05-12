@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Security.Claims;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Users.DTOs.Auth;
@@ -34,21 +35,21 @@ public partial class UserController
     }
     
     /// <summary>
-    /// PATCH api/users/{id}/change-email — sends confirmation link to new email address
+    /// PATCH api/users/me/change-email — sends confirmation link to new email address
     /// </summary>
-    /// <param name="id"></param>
     /// <param name="dto"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
     [Authorize]
-    [HttpPost("{id}/change-email")]
-    public async Task<IActionResult> EditUserEmail(Guid id, ChangeEmailRequestDto dto, IValidator<ChangeEmailRequestDto> validator)
+    [HttpPost("me/change-email")]
+    public async Task<IActionResult> EditUserEmail(ChangeEmailRequestDto dto, IValidator<ChangeEmailRequestDto> validator)
     {
         var validationResult = await validator.ValidateAsync(dto);
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
         
-        await authService.ChangeEmailRequestAsync(id, dto);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        await authService.ChangeEmailRequestAsync(Guid.Parse(userId!), dto);
         return Ok();
     }
     

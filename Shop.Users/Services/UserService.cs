@@ -14,6 +14,7 @@ public partial class UserService (UsersDbContext dbContext, IProductServiceClien
         if (user is null) throw new NotFoundException($"User {id} not found");
         
         user.Name = dto.Name;
+        await dbContext.SaveChangesAsync();
     }
     
     public async Task DeleteSelf(string? userIdString)
