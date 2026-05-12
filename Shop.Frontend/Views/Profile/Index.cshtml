@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <h2>My Profile</h2>
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success">@TempData["Message"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <h5 class="mt-4">Change Name</h5>
+        <form asp-controller="Profile" asp-action="ChangeName" method="post">
+            <div class="form-group mb-3">
+                <label>New Name</label>
+                <input name="Name" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Update Name</button>
+        </form>
+
+        <hr class="my-4" />
+
+        <h5>Change Email</h5>
+        <form asp-controller="Profile" asp-action="ChangeEmail" method="post">
+            <div class="form-group mb-3">
+                <label>New Email</label>
+                <input name="NewEmail" class="form-control" type="email" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Request Email Change</button>
+        </form>
+    </div>
+</div>
+
+<hr class="my-4" />
+<form asp-controller="Profile" asp-action="Delete" method="post">
+    <button type="submit" class="btn btn-danger w-100"
+            onclick="return confirm('Permanently delete your account? This cannot be undone.')">Delete Account</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

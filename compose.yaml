@@ -1,0 +1,103 @@
+﻿services:
+  mailpit:
+    image: axllent/mailpit
+    container_name: shop-mailpit
+    ports:
+      - "1026:1025"
+      - "8025:8025"
+    networks:
+      - shop-network
+
+  shop.frontend:
+    image: shop.frontend
+    environment:
+      - ApiSettings__UsersAPI=${USERS_API_URL}
+      - ApiSettings__ProductsAPI=${PRODUCTS_API_URL}
+    build:
+      context: .
+      dockerfile: Shop.Frontend/Dockerfile
+    ports:
+      - 8082:8080
+    depends_on:
+      - shop.users
+      - shop.products
+    networks:
+      - shop-network
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - shop-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  shop.products:
+    image: shop.products
+    build:
+      context: .
+      dockerfile: Shop.Products/Dockerfile
+    ports:
+      - 8081:8080
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - JwtSettings__Key=${JWT_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__TokenDuration=${JWT_TOKEN_DURATION}
+      - InternalApiKey=${INTERNAL_API_KEY}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${PRODUCTS_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - shop-network
+
+  shop.users:
+    image: shop.users
+    build:
+      context: .
+      dockerfile: Shop.Users/Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${USERS_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - Email__Host=mailpit
+      - Email__Port=1025
+      - App__BaseUrl=${APP_BASE_URL}
+      - App__EmailFrom=${APP_EMAIL_FROM}
+      - ProductsService__BaseUrl=${PRODUCTS_API_URL}
+      - Admin__AdminEmail=${ADMIN_EMAIL}
+      - Admin__AdminRole=${ADMIN_ROLE}
+      - Admin__AdminPassword=${ADMIN_PASSWORD}
+      - Admin__AdminName=${ADMIN_NAME}
+      - JwtSettings__Key=${JWT_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__TokenDuration=${JWT_TOKEN_DURATION}
+      - InternalApiKey=${INTERNAL_API_KEY}
+    depends_on:
+      mailpit:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    networks:
+      - shop-network
+
+networks:
+  shop-network:
+    driver: bridge
+volumes:
+  postgres_data:
