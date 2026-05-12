@@ -95,12 +95,11 @@ public class ProfileController(IHttpClientFactory httpClientFactory) : BaseContr
     public async Task<IActionResult> Delete()
     {
         var token = HttpContext.Session.GetString("JwtToken");
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var client = httpClientFactory.CreateClient(ApiClients.Users);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        await client.DeleteAsync($"/api/users/{userId}");
+        await client.DeleteAsync("/api/users/me");
 
         HttpContext.Session.Clear();
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

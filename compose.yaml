@@ -32,6 +32,11 @@
       - postgres_data:/var/lib/postgresql
     networks:
       - shop-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   shop.products:
     image: shop.products
@@ -45,7 +50,8 @@
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=${PRODUCTS_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - shop-network
 
@@ -70,8 +76,10 @@
       - Admin__AdminPassword=${ADMIN_PASSWORD}
       - Admin__AdminName=${ADMIN_NAME}
     depends_on:
-      - postgres
-      - mailpit
+      mailpit:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     networks:
       - shop-network
 

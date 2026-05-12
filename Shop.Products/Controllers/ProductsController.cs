@@ -107,7 +107,7 @@ public partial class ProductsController(IProductService productService) : Contro
         return Ok();
     }
     
-    [HttpDelete("users/{0}/delete")]
+    [HttpDelete("users/{id}/delete")]
     public async Task<IActionResult> DeleteAllUserProducts(Guid id)
     {
         await productService.DeleteAllProductsForUser(id);
