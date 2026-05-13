@@ -10,7 +10,6 @@ using Shop.Shared.Middleware;
 using Shop.Shared.Settings;
 using Shop.Users.Application.DTOs.Validators;
 using Shop.Users.Application.Interfaces;
-using Shop.Users.Application.Interfaces;
 using Shop.Users.Application.Services;
 using Shop.Users.Domain.Models;
 using Shop.Users.Infrastructure.Data;
@@ -131,8 +130,11 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
-    db.Database.Migrate();
-    
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        db.Database.Migrate();
+    }
+
     var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
     var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
     
@@ -140,3 +142,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+public partial class Program { }

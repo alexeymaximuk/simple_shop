@@ -1,7 +1,5 @@
 ﻿using NSubstitute;
-using Shop.Shared.Constants;
 using Shop.Shared.Exceptions;
-using Shop.Shared.Helpers;
 using Shop.Users.Application.DTOs.Auth;
 using Shop.Users.Application.Interfaces;
 using Shop.Users.Application.Services;

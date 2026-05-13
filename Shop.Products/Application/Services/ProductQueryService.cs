@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Shop.Products.Application.DTOs;
+﻿using Shop.Products.Application.DTOs;
 using Shop.Products.Application.Interfaces;
 using Shop.Shared.Exceptions;
 

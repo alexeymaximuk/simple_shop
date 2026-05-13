@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Shop.Frontend.Models;
+﻿namespace Shop.Frontend.Models;
 
 public class ProductFilterViewModel
 {

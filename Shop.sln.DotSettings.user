@@ -8,13 +8,22 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003APasswordHasher_00601_002Ecs_002Fl_003AC_0021_003FUsers_003Fnepro_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E1_003Fresharper_002Dhost_003FDecompilerCache_003Fdecompiler_003Ffbf8881823e447f9aa4293d9a7b69ca56d908_003F87_003F7564ea54_003FPasswordHasher_00601_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AValidationException_002Ecs_002Fl_003AC_0021_003FUsers_003Fnepro_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E1_003Fresharper_002Dhost_003FSourcesCache_003F9161da3da671f777cc3652d39696c23db97793e37cb97fcb4e1e87234e56322_003FValidationException_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=52ccaf24_002D6eac_002D4d65_002Dadac_002Df6993d9b7acb/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Login_UserNotFound_ThrowsNotFoundException" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Services.EmailVerificationServiceTest.ConfirmEmailAsync_ValidData_ConfirmsUserEmail&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Services.EmailVerificationServiceTest.ResendConfirmationAsync_UserNotFound_ThrowsNotFoundException&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Services.EmailVerificationServiceTest.ResendConfirmationAsync_EmailConfirmed_ThrowsInvalidRequestException&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Services.EmailVerificationServiceTest.ResendConfirmationAsync_ValidData_SendsTokenInEmail&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Services.EmailVerificationServiceTest.ResendConfirmationAsync_ValidData_SetsNewTokenAndExpiry&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Services.EmailVerificationServiceTest.ConfirmEmailAsync_TokenExpiryNull_ThrowsTokenExpiredException&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+  &lt;Or&gt;&#xD;
+    &lt;And&gt;&#xD;
+      &lt;TestAncestor&gt;&#xD;
+        &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Integration.AuthControllerTests&lt;/TestId&gt;&#xD;
+        &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Integration.EmailConfirmationControllerTests&lt;/TestId&gt;&#xD;
+      &lt;/TestAncestor&gt;&#xD;
+      &lt;Not&gt;&#xD;
+        &lt;TestAncestor&gt;&#xD;
+          &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Integration.AuthControllerTests&lt;/TestId&gt;&#xD;
+        &lt;/TestAncestor&gt;&#xD;
+      &lt;/Not&gt;&#xD;
+    &lt;/And&gt;&#xD;
+    &lt;TestAncestor&gt;&#xD;
+      &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Integration.UserManagementControllerTests&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Integration.AuthControllerTests&lt;/TestId&gt;&#xD;
+    &lt;/TestAncestor&gt;&#xD;
+  &lt;/Or&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	</wpf:ResourceDictionary>
