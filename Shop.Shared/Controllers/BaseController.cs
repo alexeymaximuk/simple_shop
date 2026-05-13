@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Shop.Shared.Controllers;
 
+/// <summary>
+/// Base controller for MVC Frontend. Provides helper methods for handling API error responses in views.
+/// </summary>
 public abstract class BaseController : Controller
 {
     protected async Task AddApiErrors(HttpResponseMessage response)
@@ -11,7 +14,7 @@ public abstract class BaseController : Controller
         try
         {
             var json = JsonDocument.Parse(body).RootElement;
-        
+
             if (json.ValueKind == JsonValueKind.Array)
             {
                 foreach (var error in json.EnumerateArray())
