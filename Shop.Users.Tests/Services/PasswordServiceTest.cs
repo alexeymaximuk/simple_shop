@@ -22,6 +22,8 @@ public class PasswordServiceTest
         _sut = new PasswordService(_userRepository, _emailSendingService, _passwordHasher);
     }
 
+    #region ChangePasswordRequestAsync
+
     [Fact]
     public async Task ChangePasswordRequestAsync_UserNotFound_ThrowsNotFoundException()
     {
@@ -66,6 +68,11 @@ public class PasswordServiceTest
         Assert.True(user.PasswordResetTokenExpiry > DateTime.UtcNow);
     }
 
+    #endregion
+
+
+    #region ValidateChangePasswordRequestAsync
+
     [Fact]
     public async Task ValidateChangePasswordRequestAsync_UserNotFound_ThrowsNotFoundException()
     {
@@ -99,7 +106,25 @@ public class PasswordServiceTest
             _sut.ValidateChangePasswordRequestAsync("test")
         );
     }
-    
+
+    [Fact]
+    public async Task ValidateChangePasswordRequestAsync_ValidToken_DoesNotThrow()
+    {
+        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User
+        {
+            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1)
+        });
+
+        var exception = await Record.ExceptionAsync(() => _sut.ValidateChangePasswordRequestAsync("valid-token"));
+
+        Assert.Null(exception);
+    }
+
+    #endregion
+
+
+    #region ChangePasswordAsync
+
     [Fact]
     public async Task ChangePasswordAsync_UserNotFound_ThrowsNotFoundException()
     {
@@ -167,4 +192,6 @@ public class PasswordServiceTest
         Assert.Null(user.PasswordResetToken);
         Assert.Null(user.PasswordResetTokenExpiry);
     }
+
+    #endregion
 }

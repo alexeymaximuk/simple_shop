@@ -39,19 +39,25 @@ public class ProductRepository(ProductsDbContext dbContext) : IProductRepository
 
     public Task SaveChangesAsync() => dbContext.SaveChangesAsync();
 
-    public Task SoftDeleteByUserIdAsync(Guid userId) =>
-        dbContext.Products
-            .Where(p => p.UserId == userId)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDeleted, true));
+    public async Task SoftDeleteByUserIdAsync(Guid userId)
+    {
+        var products = await dbContext.Products.Where(p => p.UserId == userId).ToListAsync();
+        foreach (var p in products) p.IsDeleted = true;
+        await dbContext.SaveChangesAsync();
+    }
 
-    public Task RestoreByUserIdAsync(Guid userId) =>
-        dbContext.Products
-            .Where(p => p.UserId == userId)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDeleted, false));
+    public async Task RestoreByUserIdAsync(Guid userId)
+    {
+        var products = await dbContext.Products.Where(p => p.UserId == userId).ToListAsync();
+        foreach (var p in products) p.IsDeleted = false;
+        await dbContext.SaveChangesAsync();
+    }
 
-    public Task DeleteAllByUserIdAsync(Guid userId) =>
-        dbContext.Products
-            .Where(p => p.UserId == userId)
-            .ExecuteDeleteAsync();
+    public async Task DeleteAllByUserIdAsync(Guid userId)
+    {
+        var products = await dbContext.Products.Where(p => p.UserId == userId).ToListAsync();
+        dbContext.Products.RemoveRange(products);
+        await dbContext.SaveChangesAsync();
+    }
 }
 

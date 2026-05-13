@@ -126,18 +126,18 @@ public class ProductsController(IHttpClientFactory httpClientFactory) : BaseCont
     }
 
     [HttpPost]
-    public async Task<IActionResult> Deactivate(Guid id)
+    public async Task<IActionResult> Deactivate(Guid id, bool showDeleted)
     {
         var client = AuthorizedClient();
         await client.PostAsync($"products/{id}/deactivate", null);
-        return RedirectToAction("MyProducts");
+        return RedirectToAction("MyProducts", new { showDeleted });
     }
 
     [HttpPost]
-    public async Task<IActionResult> Activate(Guid id)
+    public async Task<IActionResult> Activate(Guid id, bool showDeleted)
     {
         var client = AuthorizedClient();
         await client.PostAsync($"products/{id}/activate", null);
-        return RedirectToAction("MyProducts");
+        return RedirectToAction("MyProducts", new { showDeleted });
     }
 }

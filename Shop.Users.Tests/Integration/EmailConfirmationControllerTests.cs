@@ -63,6 +63,8 @@ public class EmailConfirmationControllerTests(UsersApiFactory factory) : IClassF
         return raw.Trim('"');
     }
 
+    #region ConfirmEmail
+
     [Fact]
     public async Task ConfirmEmail_ValidToken_Returns200()
     {
@@ -98,6 +100,11 @@ public class EmailConfirmationControllerTests(UsersApiFactory factory) : IClassF
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    #endregion
+
+
+    #region ResendConfirmation
+
     [Fact]
     public async Task ResendConfirmation_UnconfirmedEmail_Returns200()
     {
@@ -131,6 +138,11 @@ public class EmailConfirmationControllerTests(UsersApiFactory factory) : IClassF
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }
+
+    #endregion
+
+
+    #region ChangeEmail
 
     [Fact]
     public async Task ChangeEmail_ValidRequest_Returns200()
@@ -175,6 +187,11 @@ public class EmailConfirmationControllerTests(UsersApiFactory factory) : IClassF
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    #endregion
+
+
+    #region ConfirmEmailChange
 
     [Fact]
     public async Task ConfirmEmailChange_ValidToken_Returns200()
@@ -224,4 +241,6 @@ public class EmailConfirmationControllerTests(UsersApiFactory factory) : IClassF
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    #endregion
 }

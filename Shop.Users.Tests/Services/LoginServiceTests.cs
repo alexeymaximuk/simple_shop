@@ -28,6 +28,8 @@ public class LoginServiceTests
         _sut = new LoginService(_userRepository, _passwordHasher, _jwtSettings);
     }
 
+    #region Login
+
     [Fact]
     public async Task Login_UserNotFound_ThrowsNotFoundException()
     {
@@ -98,4 +100,6 @@ public class LoginServiceTests
         Assert.NotNull(result);
         Assert.NotEmpty(result);
     }
+
+    #endregion
 }

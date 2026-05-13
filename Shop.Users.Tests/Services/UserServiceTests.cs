@@ -19,6 +19,8 @@ public class UserServiceTests
         _sut = new UserService(_userRepository, _productServiceClient);
     }
 
+    #region UpdateUsernameAsync
+
     [Fact]
     public async Task UpdateUsernameAsync_UserNotFound_ThrowsUserNotFoundException()
     {
@@ -41,6 +43,11 @@ public class UserServiceTests
         Assert.Equal("NewName", user.Name);
     }
 
+    #endregion
+    
+
+    #region DeleteSelf
+
     [Fact]
     public async Task DeleteSelf_EmptyGuid_ThrowsAuthorisationException()
     {
@@ -60,6 +67,11 @@ public class UserServiceTests
         
         await _userRepository.Received(1).SaveChangesAsync();
     }
+
+    #endregion
+
+
+    #region DeleteAsync
 
     [Fact]
     public async Task DeleteAsync_UserNotFound_ThrowsUserNotFoundException()
@@ -83,6 +95,11 @@ public class UserServiceTests
         await _userRepository.Received(1).SaveChangesAsync();
         await _productServiceClient.Received(1).DeleteUserProducts(user.Id);
     }
+
+    #endregion
+
+
+    #region DeactivateAsync
 
     [Fact]
     public async Task DeactivateAsync_UserNotFound_ThrowsUserNotFoundException()
@@ -108,7 +125,12 @@ public class UserServiceTests
         await _userRepository.Received(1).SaveChangesAsync();
         await _productServiceClient.Received(1).DeactivateUserProducts(user.Id);
     }
-    
+
+    #endregion
+
+
+    #region ActivateAsync
+
     [Fact]
     public async Task ActivateAsync_UserNotFound_ThrowsUserNotFoundException()
     {
@@ -133,7 +155,12 @@ public class UserServiceTests
         await _userRepository.Received(1).SaveChangesAsync();
         await _productServiceClient.Received(1).ReactivateUserProducts(user.Id);
     }
+
+    #endregion
     
+
+    #region GetByIdAsync
+
     [Fact]
     public async Task GetByIdAsync_UserNotFound_ReturnsNull()
     {
@@ -154,4 +181,38 @@ public class UserServiceTests
         Assert.Equal(user.Email, result.Email);
         Assert.Equal(user.Name, result.Name);
     }
+
+    #endregion
+
+
+    #region GetAllAsync
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsAllMappedDtos()
+    {
+        var users = new List<User>
+        {
+            new() { Id = Guid.NewGuid(), Name = "name1", Email = "test1@test.com" },
+            new() { Id = Guid.NewGuid(), Name = "name1", Email = "test2@test.com" }
+        };
+        _userRepository.GetAllAsync().Returns(users);
+
+        var result = (await _sut.GetAllAsync()).ToList();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal(users[0].Email, result[0].Email);
+        Assert.Equal(users[1].Email, result[1].Email);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_NoUsers_ReturnsEmptyCollection()
+    {
+        _userRepository.GetAllAsync().Returns(new List<User>());
+
+        var result = await _sut.GetAllAsync();
+
+        Assert.Empty(result);
+    }
+
+    #endregion
 }

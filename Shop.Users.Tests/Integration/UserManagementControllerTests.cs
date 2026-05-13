@@ -92,6 +92,8 @@ public class UserManagementControllerTests(UsersApiFactory factory) : IClassFixt
     private void ClearAuth() =>
         _client.DefaultRequestHeaders.Authorization = null;
 
+    #region DeleteCurrentUser
+
     [Fact]
     public async Task DeleteCurrentUser_Authenticated_Returns204()
     {
@@ -113,6 +115,11 @@ public class UserManagementControllerTests(UsersApiFactory factory) : IClassFixt
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    #endregion
+
+
+    #region DeleteUser
 
     [Fact]
     public async Task DeleteUser_AsAdmin_Returns204()
@@ -166,6 +173,11 @@ public class UserManagementControllerTests(UsersApiFactory factory) : IClassFixt
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    #endregion
+
+
+    #region DeactivateUser
+
     [Fact]
     public async Task DeactivateUser_AsAdmin_Returns200()
     {
@@ -206,6 +218,24 @@ public class UserManagementControllerTests(UsersApiFactory factory) : IClassFixt
     }
 
     [Fact]
+    public async Task DeactivateUser_NotFound_Returns404()
+    {
+        ResetDb();
+        var adminJwt = await RegisterConfirmAndLoginAsAdmin("admin@test.com");
+
+        SetAuth(adminJwt);
+        var response = await _client.PostAsync($"/api/users/{Guid.NewGuid()}/deactivate", null);
+        ClearAuth();
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    #endregion
+
+
+    #region ActivateUser
+
+    [Fact]
     public async Task ActivateUser_AsAdmin_Returns200()
     {
         ResetDb();
@@ -235,6 +265,33 @@ public class UserManagementControllerTests(UsersApiFactory factory) : IClassFixt
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
+
+    [Fact]
+    public async Task ActivateUser_Unauthenticated_Returns401()
+    {
+        ResetDb();
+        var response = await _client.PostAsync($"/api/users/{Guid.NewGuid()}/activate", null);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ActivateUser_NotFound_Returns404()
+    {
+        ResetDb();
+        var adminJwt = await RegisterConfirmAndLoginAsAdmin("admin@test.com");
+
+        SetAuth(adminJwt);
+        var response = await _client.PostAsync($"/api/users/{Guid.NewGuid()}/activate", null);
+        ClearAuth();
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    #endregion
+
+
+    #region ChangeName
 
     [Fact]
     public async Task ChangeName_ValidData_Returns200()
@@ -280,6 +337,11 @@ public class UserManagementControllerTests(UsersApiFactory factory) : IClassFixt
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    #endregion
+    
+
+    #region GetById
+
     [Fact]
     public async Task GetById_ExistingUser_Returns200()
     {
@@ -300,6 +362,11 @@ public class UserManagementControllerTests(UsersApiFactory factory) : IClassFixt
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    #endregion
+    
+
+    #region GetAll
 
     [Fact]
     public async Task GetAll_AsAdmin_Returns200()
@@ -335,5 +402,6 @@ public class UserManagementControllerTests(UsersApiFactory factory) : IClassFixt
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
-}
 
+    #endregion
+}

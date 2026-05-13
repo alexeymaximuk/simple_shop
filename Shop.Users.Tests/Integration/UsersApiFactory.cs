@@ -11,6 +11,8 @@ namespace Shop.Users.Tests.Integration;
 
 public class UsersApiFactory : WebApplicationFactory<Program>
 {
+    private readonly string _dbName = $"TestUsersDb_{Guid.NewGuid()}";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
@@ -20,7 +22,7 @@ public class UsersApiFactory : WebApplicationFactory<Program>
             foreach (var d in dbDescriptors) services.Remove(d);
 
             services.AddDbContext<UsersDbContext>(options =>
-                options.UseInMemoryDatabase("TestDb"));
+                options.UseInMemoryDatabase(_dbName));
             
             var emailDescriptors = services.Where(d =>
                 d.ServiceType == typeof(IEmailSendingService)).ToList();

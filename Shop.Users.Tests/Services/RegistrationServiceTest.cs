@@ -21,6 +21,8 @@ public class RegistrationServiceTest
         _sut = new RegistrationService(_userRepository, _passwordHasher, _emailVerificationService);
     }
 
+    #region RegisterAsync
+
     [Fact]
     public async Task RegisterAsync_UserExists_ThrowsDuplicateMailException()
     {
@@ -67,4 +69,6 @@ public class RegistrationServiceTest
 
         _passwordHasher.Received(1).HashPassword(Arg.Any<User>(), "password");
     }
+
+    #endregion
 }

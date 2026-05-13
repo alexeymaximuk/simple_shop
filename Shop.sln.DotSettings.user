@@ -23,6 +23,19 @@
     &lt;TestAncestor&gt;&#xD;
       &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Integration.UserManagementControllerTests&lt;/TestId&gt;&#xD;
       &lt;TestId&gt;xUnit::F9A2B816-E7B2-4226-889E-72244E2938DD::net8.0::Shop.Users.Tests.Integration.AuthControllerTests&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest.EditProduct_WrongUser_ThrowsForbiddenException&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest.CreateProduct_ShouldEditProduct&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest.DeactivateProduct_ProductDoesntExist_ThrowsNotFoundException&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest.EditProduct_ProductDoesntExist_ThrowsNotFoundException&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest.DeactivateProduct_WrongUser_ThrowsForbiddenException&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest.DeactivateProduct_ProductAlreadyDeactivated_ThrowsInvalidRequestException&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest.DeactivateProduct_CorrectRequest_DeactivatesProduct&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest.ActivateProduct_CorrectRequest_DeactivatesProduct&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductCommandServiceTest&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductExternalServiceTest&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Services.ProductQueryServiceTest&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Integration.ProductsSyncControllerTests&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::04561A4F-B607-4D8D-AD85-64E3C17B6AF9::net8.0::Shop.Products.Tests.Integration.ProductsControllerTests&lt;/TestId&gt;&#xD;
     &lt;/TestAncestor&gt;&#xD;
   &lt;/Or&gt;&#xD;
 &lt;/SessionState&gt;</s:String>

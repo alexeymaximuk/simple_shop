@@ -52,6 +52,8 @@ public class AuthControllerTests(UsersApiFactory factory) : IClassFixture<UsersA
         await _client.GetAsync($"/api/users/confirm-email?token={token}");
     }
 
+    #region Register
+
     [Fact]
     public async Task Register_ValidData_Returns200()
     {
@@ -91,6 +93,11 @@ public class AuthControllerTests(UsersApiFactory factory) : IClassFixture<UsersA
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+
+    #endregion
+
+
+    #region Login
 
     [Fact]
     public async Task Login_ValidCredentials_Returns200()
@@ -166,6 +173,11 @@ public class AuthControllerTests(UsersApiFactory factory) : IClassFixture<UsersA
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    #endregion
+
+
+    #region ResetPasswordRequest
+
     [Fact]
     public async Task ResetPasswordRequest_RegisteredEmail_Returns200()
     {
@@ -187,6 +199,21 @@ public class AuthControllerTests(UsersApiFactory factory) : IClassFixture<UsersA
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task ResetPasswordRequest_InvalidEmailFormat_Returns400()
+    {
+        ResetDb();
+        var response = await _client.PostAsJsonAsync("/api/users/reset-password-request",
+            new ResetPasswordRequestDto { Email = "not-an-email" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    #endregion
+
+
+    #region ValidateResetToken
 
     [Fact]
     public async Task ValidateResetToken_ValidToken_Returns200()
@@ -226,6 +253,11 @@ public class AuthControllerTests(UsersApiFactory factory) : IClassFixture<UsersA
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    #endregion
+
+
+    #region ResetPassword
 
     [Fact]
     public async Task ResetPassword_ValidToken_Returns200()
@@ -277,4 +309,6 @@ public class AuthControllerTests(UsersApiFactory factory) : IClassFixture<UsersA
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    #endregion
 }

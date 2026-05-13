@@ -20,6 +20,8 @@ public class EmailVerificationServiceTest
         _sut = new EmailVerificationService(_userRepository, _emailSendingService);
     }
 
+    #region ChangeEmailRequestAsync
+
     [Fact]
     public async Task ChangeEmailRequestAsync_UserNotFound_ThrowsNotFoundException()
     {
@@ -48,7 +50,12 @@ public class EmailVerificationServiceTest
         await _userRepository.Received(1).SaveChangesAsync();
         await _emailSendingService.Received(1).SendEmailChangeMailAsync(user.PendingEmail!, user.EmailChangeToken!);
     }
+
+    #endregion
     
+
+    #region ChangeEmailConfirmAsync
+
     [Fact]
     public async Task ChangeEmailConfirmAsync_UserNotFound_ThrowsNotFoundException()
     {
@@ -109,6 +116,11 @@ public class EmailVerificationServiceTest
         await _userRepository.Received(1).SaveChangesAsync();
     }
 
+    #endregion
+
+
+    #region ConfirmEmailAsync
+
     [Fact]
     public async Task ConfirmEmailAsync_UserNotFound_ThrowsNotFoundException()
     {
@@ -149,6 +161,11 @@ public class EmailVerificationServiceTest
         await _userRepository.Received(1).SaveChangesAsync();
     }
 
+    #endregion
+    
+
+    #region ResendConfirmationAsync
+
     [Fact]
     public async Task ResendConfirmationAsync_UserNotFound_ThrowsNotFoundException()
     {
@@ -181,4 +198,6 @@ public class EmailVerificationServiceTest
         Assert.True(user.EmailConfirmationTokenExpiry > DateTime.UtcNow);
         await _emailSendingService.Received(1).SendEmailConfirmationMailAsync(user.Email, user.EmailConfirmationToken!);
     }
+
+    #endregion
 }
