@@ -54,7 +54,7 @@
                                 {
                                     <form asp-action="Deactivate" method="post" class="d-inline">
                                         <input type="hidden" name="id" value="@p.Id" />
-                                        <input type="hidden" name="showDeleted" value="@ViewBag.ShowDeleted" />
+                                        <input type="hidden" name="showDeleted" value="@((bool)ViewBag.ShowDeleted ? "true" : "false")" />
                                         <button type="submit" class="btn btn-sm btn-outline-warning">Deactivate</button>
                                     </form>
                                 }
@@ -62,7 +62,7 @@
                                 {
                                     <form asp-action="Activate" method="post" class="d-inline">
                                         <input type="hidden" name="id" value="@p.Id" />
-                                        <input type="hidden" name="showDeleted" value="@ViewBag.ShowDeleted" />
+                                        <input type="hidden" name="showDeleted" value="@((bool)ViewBag.ShowDeleted ? "true" : "false")" />
                                         <button type="submit" class="btn btn-sm btn-outline-success">Activate</button>
                                     </form>
                                 }
