@@ -4,7 +4,7 @@
 
 `Shop` is a microservices-based e-commerce system built with **ASP.NET Core (.NET 8)**.
 
-The system consists of three independent services and one shared library:
+The system consists of three independent services, one shared library, and two test projects:
 
 | Project | Type | Description |
 |---|---|---|
@@ -12,8 +12,28 @@ The system consists of three independent services and one shared library:
 | `Shop.Products` | Web API | Product catalog and product management |
 | `Shop.Frontend` | ASP.NET Core MVC | Server-rendered web UI |
 | `Shop.Shared` | Class Library | Shared middleware, exceptions, extensions, and settings |
+| `Shop.Users.Tests` | xUnit Test Project | Unit + integration tests for Shop.Users |
+| `Shop.Products.Tests` | xUnit Test Project | Unit + integration tests for Shop.Products |
 
 Services communicate over HTTP. Service-to-service calls (Users → Products) are secured with an internal API key.
+
+---
+
+## Technical Stack
+
+| Concern | Technology |
+|---|---|
+| Framework | ASP.NET Core 8 Web API / MVC |
+| ORM | Entity Framework Core 8 (Code First) |
+| Database | PostgreSQL (`Npgsql.EntityFrameworkCore.PostgreSQL`) |
+| Authentication | JWT Bearer (`Microsoft.AspNetCore.Authentication.JwtBearer`) |
+| Frontend auth | Cookie Authentication |
+| Validation | FluentValidation 12 |
+| Password hashing | `Microsoft.AspNetCore.Identity.PasswordHasher<T>` |
+| Email | MailKit (SMTP) |
+| API documentation | Swagger / Swashbuckle (Development only) |
+| Containerisation | Docker + Docker Compose |
+| Testing | xUnit, NSubstitute, WebApplicationFactory, EF Core InMemory |
 
 ---
 
@@ -21,65 +41,107 @@ Services communicate over HTTP. Service-to-service calls (Users → Products) ar
 
 ```text
 Shop/
-├── Shop.Users/
-│   ├── Controllers/
-│   │   ├── UserController.cs
-│   │   ├── UserController.Auth.cs
-│   │   ├── UserController.EmailConfirmation.cs
-│   │   └── UserController.Management.cs
-│   ├── Data/
-│   │   ├── UsersDbContext.cs
-│   │   └── Seed/AdminSeeder.cs
-│   ├── DTOs/
-│   │   ├── Auth/
-│   │   ├── Users/
-│   │   └── Validators/
-│   ├── Migrations/
-│   ├── Models/User.cs
-│   ├── Services/
-│   │   ├── AuthService.cs (+ partial files)
-│   │   ├── UserService.cs (+ partial files)
-│   │   ├── EmailService.cs (+ partial files)
-│   │   ├── ProductServiceClient.cs
-│   │   └── Interfaces/
-│   └── Settings/
+├── Shop.Users/                         # User management service
+│   ├── Application/
+│   │   ├── DTOs/
+│   │   │   ├── Auth/                   # RegisterUserDto, LoginUserDto, ResetPasswordDto, etc.
+│   │   │   └── Users/                  # UpdateUsernameDto, UserResponseDto
+│   │   ├── Interfaces/                 # IUserRepository, ILoginService, IRegistrationService,
+│   │   │                               # IPasswordService, IEmailVerificationService,
+│   │   │                               # IUserService, IProductServiceClient, IEmailSendingService
+│   │   ├── Services/                   # LoginService, RegistrationService, PasswordService,
+│   │   │                               # EmailVerificationService, UserService, ProductServiceClient
+│   │   └── Validators/                 # FluentValidation validators for all DTOs
+│   ├── Domain/
+│   │   ├── Models/User.cs
+│   │   └── Settings/                   # AppSettings, EmailSettings
+│   ├── Infrastructure/
+│   │   ├── Data/
+│   │   │   ├── UsersDbContext.cs
+│   │   │   ├── UserRepository.cs
+│   │   │   ├── Seed/AdminSeeder.cs
+│   │   │   └── Migrations/
+│   │   └── Email/
+│   │       ├── EmailSendingService.cs
+│   │       └── Constants/EmailTemplates.cs
+│   ├── Presentation/
+│   │   └── Controllers/
+│   │       ├── AuthController.cs           # Register, Login, ResetPassword flows
+│   │       ├── EmailConfirmationController.cs  # Email confirm + change flows
+│   │       └── UserManagementController.cs # CRUD, activate/deactivate (admin)
+│   ├── appsettings.json
+│   ├── appsettings.Development.json
+│   ├── appsettings.Testing.json
+│   └── Program.cs
 │
-├── Shop.Products/
-│   ├── Controllers/
-│   │   ├── ProductsController.cs
-│   │   └── ProductsController.HelperMethods.cs
-│   ├── Data/ProductsDbContext.cs
-│   ├── DTOs/
-│   │   └── Validators/
-│   ├── Migrations/
-│   ├── Models/Product.cs
-│   └── Services/
-│       ├── ProductService.cs
-│       ├── ProductService.Commands.cs
-│       ├── ProductService.Queries.cs
-│       ├── ProductService.HelperMethods.cs
-│       └── Interfaces/
+├── Shop.Products/                      # Product management service
+│   ├── Application/
+│   │   ├── DTOs/                       # ProductInfoDto, ProductResponseDto, ProductFilterDto
+│   │   ├── Interfaces/                 # IProductRepository, IProductCommandService,
+│   │   │                               # IProductQueryService, IProductExternalServices
+│   │   ├── Services/                   # ProductCommandService, ProductQueryService,
+│   │   │                               # ProductExternalServices
+│   │   └── Validators/                 # ProductInfoDtoValidator, ProductFilterDtoValidator
+│   ├── Domain/
+│   │   └── Models/Product.cs
+│   ├── Infrastructure/
+│   │   └── Data/
+│   │       ├── ProductsDbContext.cs
+│   │       ├── ProductRepository.cs
+│   │       └── Migrations/
+│   ├── Presentation/
+│   │   └── Controllers/
+│   │       ├── ProductsController.cs       # Public + authenticated product endpoints
+│   │       └── ProductsSyncController.cs   # Internal endpoints (user deactivate/delete sync)
+│   ├── appsettings.json
+│   ├── appsettings.Development.json
+│   ├── appsettings.Testing.json
+│   └── Program.cs
 │
-├── Shop.Frontend/
+├── Shop.Frontend/                      # MVC web application
 │   ├── Controllers/
-│   │   ├── Auth/
-│   │   │   ├── LoginController.cs
-│   │   │   ├── RegisterController.cs
-│   │   │   ├── AccountController.cs
-│   │   │   ├── EmailController.cs
-│   │   │   └── PasswordController.cs
+│   │   ├── Auth/                       # LoginController, RegisterController, AccountController,
+│   │   │                               # EmailController, PasswordController
 │   │   ├── ProductsController.cs
 │   │   ├── ProfileController.cs
 │   │   └── HomeController.cs
-│   ├── Models/
-│   └── Views/
+│   ├── Models/                         # View models for all pages
+│   ├── Views/                          # Razor views
+│   └── Constants/ApiClients.cs
 │
-├── Shop.Shared/
-│   ├── Controllers/BaseController.cs
-│   ├── Exceptions/
+├── Shop.Shared/                        # Shared class library
+│   ├── Constants/                      # AuthConstants, ProductsServiceRoutes
+│   ├── Controllers/                    # ApiBaseController, BaseController
+│   ├── Exceptions/                     # AppException hierarchy
 │   ├── Extensions/ConfiguratorExtensions.cs
+│   ├── Filters/InternalApiKeyAttribute.cs
+│   ├── Helpers/TokenGenerator.cs
 │   ├── Middleware/ExceptionMiddleware.cs
 │   └── Settings/JwtSettings.cs
+│
+├── Shop.Users.Tests/                   # Tests for Shop.Users
+│   ├── Integration/
+│   │   ├── UsersApiFactory.cs
+│   │   ├── AuthControllerTests.cs
+│   │   ├── EmailConfirmationControllerTests.cs
+│   │   └── UserManagementControllerTests.cs
+│   └── Services/
+│       ├── RegistrationServiceTest.cs
+│       ├── LoginServiceTests.cs
+│       ├── PasswordServiceTest.cs
+│       ├── EmailVerificationServiceTest.cs
+│       └── UserServiceTests.cs
+│
+├── Shop.Products.Tests/                # Tests for Shop.Products
+│   ├── Integration/
+│   │   ├── ProductsApiFactory.cs
+│   │   ├── TestJwt.cs
+│   │   ├── ProductsControllerTests.cs
+│   │   └── ProductsSyncControllerTests.cs
+│   └── Services/
+│       ├── ProductCommandServiceTest.cs
+│       ├── ProductQueryServiceTest.cs
+│       └── ProductExternalServiceTest.cs
 │
 ├── compose.yaml
 └── global.json
@@ -89,13 +151,22 @@ Shop/
 
 ## Architecture
 
-Services are organized with **partial classes split by responsibility** (Commands, Queries, HelperMethods). Each service is self-contained with its own database.
+Both `Shop.Users` and `Shop.Products` follow **Clean Architecture** with four layers:
 
 ```
-Controller → Service Interface → Service (partial classes) → DbContext
+Presentation  →  Application  →  Domain
+                     ↓
+               Infrastructure
 ```
 
-Shared concerns (exception types, middleware, settings, base controller) live in `Shop.Shared`.
+| Layer | Responsibility |
+|---|---|
+| **Presentation** | Controllers — receive HTTP requests, delegate to services, return responses |
+| **Application** | Service interfaces + implementations, DTOs, validators — business logic |
+| **Domain** | Models and settings — pure data structures, no dependencies |
+| **Infrastructure** | DbContext, repositories, email sending — EF Core, external I/O |
+
+Controllers depend only on Application interfaces. Services depend only on repository interfaces. Infrastructure implements those interfaces — it is never referenced directly from Application.
 
 ---
 
@@ -224,7 +295,7 @@ Backend URLs are read from configuration (`ApiSettings:UsersAPI`, `ApiSettings:P
 
 ## Shop.Shared — Shared Library
 
-Shared code referenced by all three services:
+Shared code referenced by all services:
 
 | File | Purpose |
 |---|---|
@@ -233,14 +304,17 @@ Shared code referenced by all three services:
 | `Exceptions/NotFoundException.cs` | → 404 |
 | `Exceptions/AuthorisationException.cs` | → 401 |
 | `Exceptions/ForbiddenException.cs` | → 403 |
-| `Exceptions/InvalidRequestException.cs` | → 400 |
+| `Exceptions/InvalidRequestException.cs` | → 422 |
 | `Exceptions/TokenExpiredException.cs` | → 400 |
 | `Exceptions/DuplicateMailException.cs` | → 409 |
 | `Exceptions/AccountDeactivatedException.cs` | → 403 |
 | `Extensions/ConfiguratorExtensions.cs` | `GetRequiredSettings<T>()` — throws on missing config section |
+| `Filters/InternalApiKeyAttribute.cs` | Action filter that validates `X-Internal-Key` header |
+| `Helpers/TokenGenerator.cs` | Cryptographically secure token generation via `RandomNumberGenerator` |
 | `Settings/JwtSettings.cs` | Shared JWT configuration model |
-| `Constants/AuthConstants.cs` | Token expiry durations, confirmation/reset URL routes |
+| `Constants/AuthConstants.cs` | Token expiry durations |
 | `Constants/ProductsServiceRoutes.cs` | Route templates for Products internal endpoints |
+| `Controllers/ApiBaseController.cs` | `GetCurrentUserId()` helper for authenticated API controllers |
 | `Controllers/BaseController.cs` | `AddApiErrors()` helper for parsing API error responses into `ModelState` |
 
 **Error response format:**
@@ -251,22 +325,89 @@ Shared code referenced by all three services:
 
 ---
 
-## Technical Stack
+## Testing
 
-| Concern | Technology |
+Both `Shop.Users` and `Shop.Products` have dedicated test projects with **unit tests** and **integration tests**.
+
+### Test stack
+
+| Tool | Role |
 |---|---|
-| Framework | ASP.NET Core 8 Web API / MVC |
-| ORM | Entity Framework Core 8 (Code First) |
-| Database | PostgreSQL (`Npgsql.EntityFrameworkCore.PostgreSQL`) |
-| Authentication | JWT Bearer (`Microsoft.AspNetCore.Authentication.JwtBearer`) |
-| Frontend auth | Cookie Authentication |
-| Validation | FluentValidation 12 |
-| Password hashing | `Microsoft.AspNetCore.Identity.PasswordHasher<T>` |
-| Email | MailKit (SMTP) |
-| API documentation | Swagger / Swashbuckle (Development only) |
-| Containerisation | Docker + Docker Compose |
+| xUnit | Test framework |
+| NSubstitute | Mocking library for unit tests |
+| `Microsoft.AspNetCore.Mvc.Testing` | In-process integration test host (`WebApplicationFactory`) |
+| `Microsoft.EntityFrameworkCore.InMemory` | In-memory database for integration tests |
 
 ---
+
+### Shop.Users.Tests — 101 tests
+
+#### Unit tests (`Services/`)
+
+| File | Service under test | Cases covered |
+|---|---|---|
+| `RegistrationServiceTest.cs` | `RegistrationService` | Duplicate email, adds user to repo, hashes password, sends confirmation email |
+| `LoginServiceTests.cs` | `LoginService` | User not found, inactive account, unconfirmed email, wrong password, valid login returns token |
+| `PasswordServiceTest.cs` | `PasswordService` | Request not found / deactivated / valid; validate token expired / null / valid; change password hashes + notifies + clears token |
+| `EmailVerificationServiceTest.cs` | `EmailVerificationService` | Confirm email (not found, expired, valid); resend (not found, already confirmed, valid); change email request (not found, valid); confirm change (not found, no pending email, expired, valid) |
+| `UserServiceTests.cs` | `UserService` | Update name, delete self (null id, valid), delete by id (not found, valid), deactivate (not found, valid), activate (not found, valid), get by id (null / found), get all (empty / populated) |
+
+#### Integration tests (`Integration/`)
+
+Tests use `UsersApiFactory` — a `WebApplicationFactory<Program>` with:
+- EF Core InMemory database (unique per test class)
+- `IEmailSendingService` replaced with an NSubstitute mock (no real SMTP)
+- `IProductServiceClient` replaced with an NSubstitute mock (no real HTTP calls)
+- Environment set to `Testing` (loads `appsettings.Testing.json`)
+
+| File | Controller | Scenarios |
+|---|---|---|
+| `AuthControllerTests.cs` | `AuthController` | Register (valid, invalid email, duplicate); Login (valid, unconfirmed, inactive, wrong password, not found); ResetPasswordRequest (valid, not found, invalid email); ValidateResetToken (valid, invalid, expired); ResetPassword (valid, invalid token, expired) |
+| `EmailConfirmationControllerTests.cs` | `EmailConfirmationController` | ConfirmEmail (valid, invalid, expired); ResendConfirmation (valid, not registered, already confirmed); ChangeEmail (valid, unauthenticated, invalid format); ConfirmEmailChange (valid, invalid token, expired) |
+| `UserManagementControllerTests.cs` | `UserManagementController` | DeleteCurrentUser (authenticated, unauthenticated); DeleteUser (admin, regular user, unauthenticated, not found); DeactivateUser (admin, regular user, unauthenticated, not found); ActivateUser (admin, regular user, unauthenticated, not found); ChangeName (valid, unauthenticated, too short); GetById (found, not found); GetAll (admin, regular user, unauthenticated) |
+
+---
+
+### Shop.Products.Tests — 52 tests
+
+#### Unit tests (`Services/`)
+
+| File | Service under test | Cases covered |
+|---|---|---|
+| `ProductCommandServiceTest.cs` | `ProductCommandService` | CreateProduct (valid); EditProduct (not found, wrong user, valid); ActivateProduct (not found, wrong user, already active, valid); DeactivateProduct (not found, wrong user, already deactivated, valid) |
+| `ProductQueryServiceTest.cs` | `ProductQueryService` | GetProductById (not found, found + mapping verified); GetAllProducts (empty, multiple results mapped, filter + showUnavailable forwarded to repository) |
+| `ProductExternalServiceTest.cs` | `ProductExternalServices` | SoftDeleteUserProducts, RestoreUserProducts, DeleteAllProductsForUser — each verifies correct repository method is called |
+
+#### Integration tests (`Integration/`)
+
+Tests use `ProductsApiFactory` — a `WebApplicationFactory<Program>` with:
+- EF Core InMemory database (unique per test class)
+- Environment set to `Testing` (loads `appsettings.Testing.json`)
+
+`TestJwt.cs` generates signed JWT tokens from the same `JwtSettings` that the app uses, ensuring tokens are accepted by the real authentication middleware.
+
+| File | Controller | Scenarios |
+|---|---|---|
+| `ProductsControllerTests.cs` | `ProductsController` | AddNewProduct (valid 201, unauthenticated, invalid data); EditProduct (valid, unauthenticated, wrong user, not found, invalid data); Deactivate (valid, unauthenticated, wrong user, already deactivated, not found); Activate (valid, unauthenticated, wrong user, already active, not found); GetProduct (found, not found); GetAllProducts; GetMyProducts (authenticated, unauthenticated) |
+| `ProductsSyncControllerTests.cs` | `ProductsSyncController` | DeactivateUser (valid key, no key, wrong key); ReactivateUser (valid key, no key, wrong key); DeleteAllUserProducts (valid key, no key, wrong key) |
+
+---
+
+### Running tests
+
+```bash
+# Run all tests
+dotnet test
+
+# Run a single project
+dotnet test Shop.Users.Tests
+dotnet test Shop.Products.Tests
+```
+
+Tests do **not** require a running database, SMTP server, or any other external dependency — everything is mocked or replaced with in-memory equivalents.
+
+---
+
 
 ## Authentication & Security
 
@@ -338,7 +479,7 @@ ADMIN_ROLE=Admin
 ADMIN_NAME=
 ```
 
-Migrations are applied automatically on startup via `db.Database.Migrate()`.
+Migrations are applied automatically on startup via `db.Database.Migrate()` (skipped when `ASPNETCORE_ENVIRONMENT=Testing`).
 The admin account is seeded on every startup (only created if it does not yet exist).
 
 ---

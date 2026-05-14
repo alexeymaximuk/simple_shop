@@ -23,9 +23,7 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Update Name</button>
         </form>
-
         <hr class="my-4" />
-
         <h5>Change Email</h5>
         <form asp-controller="Profile" asp-action="ChangeEmail" method="post">
             <div class="form-group mb-3">
@@ -34,14 +32,13 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Request Email Change</button>
         </form>
+        <hr class="my-4" />
+        <form asp-controller="Profile" asp-action="Delete" method="post">
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Permanently delete your account? This cannot be undone.')">Delete Account</button>
+        </form>
     </div>
 </div>
-
-<hr class="my-4" />
-<form asp-controller="Profile" asp-action="Delete" method="post">
-    <button type="submit" class="btn btn-danger w-100"
-            onclick="return confirm('Permanently delete your account? This cannot be undone.')">Delete Account</button>
-</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

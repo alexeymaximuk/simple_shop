@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Shop.Products.Data;
-using Shop.Products.DTOs.Validators;
-using Shop.Products.Services;
-using Shop.Products.Services.Interfaces;
+using Shop.Products.Application.Interfaces;
+using Shop.Products.Application.Services;
+using Shop.Products.Application.Validators;
+using Shop.Products.Infrastructure.Data;
 using Shop.Shared.Extensions;
 using Shop.Shared.Middleware;
 using Shop.Shared.Settings;
@@ -20,32 +20,24 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSwaggerGen(options =>
         {
-            options.AddSecurityDefinition(
-                "Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header
-                }
-            );
-            options.AddSecurityRequirement(
-                new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        []
-                    }
-                }
-            );
+            var securityDefinitionScheme = new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header
+            };
+            options.AddSecurityDefinition("Bearer", securityDefinitionScheme);
+            
+            var reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            };
+            var securityRequirementsScheme = new OpenApiSecurityScheme {Reference = reference};
+            var requirement = new OpenApiSecurityRequirement {{securityRequirementsScheme, []}};
+            options.AddSecurityRequirement(requirement);
         }
     );
 }
@@ -61,7 +53,10 @@ builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<ProductInfoDtoValidator>();
 
 // DI
-builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductCommandService, ProductCommandService>();
+builder.Services.AddScoped<IProductQueryService, ProductQueryService>();
+builder.Services.AddScoped<IProductExternalServices, ProductExternalServices>();
 
 var jwtSettings = builder.Configuration.GetRequiredSettings<JwtSettings>(JwtSettings.SectionName);
 builder.Services.AddSingleton(jwtSettings);
@@ -104,7 +99,15 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ProductsDbContext>();
-    db.Database.Migrate();
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        db.Database.Migrate();
+    }
 }
 
 app.Run();
+
+namespace Shop.Products
+{
+    public partial class Program { }
+}

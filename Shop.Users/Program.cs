@@ -1,20 +1,21 @@
 using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Shop.Users.Data;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using Shop.Users.Models;
-using Shop.Users.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shop.Shared.Extensions;
 using Shop.Shared.Middleware;
 using Shop.Shared.Settings;
-using Shop.Users.Data.Seed;
-using Shop.Users.DTOs.Validators;
-using Shop.Users.Services.Interfaces;
-using Shop.Users.Settings;
+using Shop.Users.Application.Interfaces;
+using Shop.Users.Application.Services;
+using Shop.Users.Application.Validators;
+using Shop.Users.Domain.Models;
+using Shop.Users.Domain.Settings;
+using Shop.Users.Infrastructure.Data;
+using Shop.Users.Infrastructure.Data.Seed;
+using EmailSendingService = Shop.Users.Infrastructure.Email.EmailSendingService;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
@@ -25,32 +26,24 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSwaggerGen(options =>
         {
-            options.AddSecurityDefinition(
-                "Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header
-                }
-            );
-            options.AddSecurityRequirement(
-                new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        []
-                    }
-                }
-            );
+            var securityDefinitionScheme = new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header
+            };
+            options.AddSecurityDefinition("Bearer", securityDefinitionScheme);
+
+            var reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            };
+            var securityRequirementsScheme = new OpenApiSecurityScheme {Reference = reference};
+            var requirement = new OpenApiSecurityRequirement {{securityRequirementsScheme, []}};
+            options.AddSecurityRequirement(requirement);
         }
     );
 }
@@ -70,9 +63,15 @@ builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddSingleton(appSettings);
 builder.Services.AddSingleton(emailSettings);
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmailSendingService, EmailSendingService>();
+
+builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
+builder.Services.AddScoped<IProductServiceClient, ProductServiceClient>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // connections
@@ -130,8 +129,11 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
-    db.Database.Migrate();
-    
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        db.Database.Migrate();
+    }
+
     var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
     var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
     
@@ -139,3 +141,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+namespace Shop.Users
+{
+    public partial class Program { }
+}
