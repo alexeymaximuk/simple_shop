@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Shop.Users.Application.DTOs.Validators;
+namespace Shop.Users.Application.Validators;
 
 public static class ValidationRules
 {

@@ -107,4 +107,7 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
-public partial class Program { }
+namespace Shop.Products
+{
+    public partial class Program { }
+}

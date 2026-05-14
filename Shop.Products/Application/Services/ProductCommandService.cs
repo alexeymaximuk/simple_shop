@@ -58,7 +58,7 @@ public class ProductCommandService(IProductRepository productRepository) : IProd
 
     private async Task<Product> FetchProduct(Guid productId, Guid userId)
     {
-        var product = await productRepository.GetByIdAsync(productId);
+        var product = await productRepository.GetByIdNotDeletedAsync(productId);
         if (product == null) throw new NotFoundException("Product not found");
         if (product.UserId != userId) throw new ForbiddenException("Access denied");
 

@@ -51,9 +51,9 @@ public class ProductCommandServiceTest
     [Fact]
     public async Task EditProduct_ProductDoesntExist_ThrowsNotFoundException()
     {
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns((Product?)null);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns((Product?)null);
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            _sut.EditProduct(Guid.NewGuid(), Guid.NewGuid(), new ProductInfoDto()));
+            _sut.EditProduct(Guid.NewGuid(), Guid.NewGuid(), new ProductInfoDto { Name = "Test name", Description = "Test description", Price = 1 }));
     }
     
     [Fact]
@@ -63,15 +63,17 @@ public class ProductCommandServiceTest
         var product = new Product
         {
             Id = Guid.NewGuid(),
-            UserId = userId1
+            UserId = userId1,
+            Name = "Test name",
+            Description = "Test description"
         };
 
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(product);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns(product);
         
         var userId2 = Guid.NewGuid();
         
         await Assert.ThrowsAsync<ForbiddenException>(() =>
-            _sut.EditProduct(product.Id, userId2, new ProductInfoDto()));
+            _sut.EditProduct(product.Id, userId2, new ProductInfoDto { Name = "Test name", Description = "Test description", Price = 1 }));
     }
     
     [Fact]
@@ -96,7 +98,7 @@ public class ProductCommandServiceTest
             Price = 2
         };
         
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(product);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns(product);
 
         await _sut.EditProduct(product.Id, userId, dto);
 
@@ -116,7 +118,7 @@ public class ProductCommandServiceTest
     [Fact]
     public async Task ActivateProduct_ProductDoesntExist_ThrowsNotFoundException()
     {
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns((Product?)null);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns((Product?)null);
         await Assert.ThrowsAsync<NotFoundException>(() =>
             _sut.ActivateProduct(Guid.NewGuid(), Guid.NewGuid()));
     }
@@ -128,10 +130,12 @@ public class ProductCommandServiceTest
         var product = new Product
         {
             Id = Guid.NewGuid(),
-            UserId = userId1
+            UserId = userId1,
+            Name = "Test name",
+            Description = "Test description"
         };
 
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(product);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns(product);
         
         var userId2 = Guid.NewGuid();
         
@@ -146,9 +150,11 @@ public class ProductCommandServiceTest
         var product = new Product
         {
             IsAvailable = true,
-            UserId = userId
+            UserId = userId,
+            Name = "Test name",
+            Description = "Test description"
         };
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(product);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns(product);
         
         await Assert.ThrowsAsync<InvalidRequestException>(()=>
             _sut.ActivateProduct(Guid.NewGuid(), userId));
@@ -162,10 +168,12 @@ public class ProductCommandServiceTest
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            IsAvailable = false
+            IsAvailable = false,
+            Name = "Test name",
+            Description = "Test description"
         };
 
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(product);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns(product);
         
         await _sut.ActivateProduct(product.Id, userId);
         
@@ -181,7 +189,7 @@ public class ProductCommandServiceTest
     [Fact]
     public async Task DeactivateProduct_ProductDoesntExist_ThrowsNotFoundException()
     {
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns((Product?)null);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns((Product?)null);
         await Assert.ThrowsAsync<NotFoundException>(() =>
             _sut.DeactivateProduct(Guid.NewGuid(), Guid.NewGuid()));
     }
@@ -193,10 +201,12 @@ public class ProductCommandServiceTest
         var product = new Product
         {
             Id = Guid.NewGuid(),
-            UserId = userId1
+            UserId = userId1,
+            Name = "Test name",
+            Description = "Test description"
         };
 
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(product);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns(product);
         
         var userId2 = Guid.NewGuid();
         
@@ -211,9 +221,11 @@ public class ProductCommandServiceTest
         var product = new Product
         {
             IsAvailable = false,
-            UserId = userId
+            UserId = userId,
+            Name = "Test name",
+            Description = "Test description"
         };
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(product);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns(product);
         
         await Assert.ThrowsAsync<InvalidRequestException>(()=>
             _sut.DeactivateProduct(Guid.NewGuid(), userId));
@@ -227,10 +239,12 @@ public class ProductCommandServiceTest
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            IsAvailable = true
+            IsAvailable = true,
+            Name = "Test name",
+            Description = "Test description"
         };
 
-        _productRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(product);
+        _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns(product);
         
         await _sut.DeactivateProduct(product.Id, userId);
         

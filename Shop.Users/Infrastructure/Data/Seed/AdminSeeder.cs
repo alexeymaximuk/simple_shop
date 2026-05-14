@@ -23,6 +23,7 @@ public static class AdminSeeder
                 Email = email,
                 Role = role,
                 Name = name,
+                PasswordHash = string.Empty, // overwritten immediately by passwordHasher.HashPassword below
                 IsEmailConfirmed = true,
                 IsActive = true
             };

@@ -26,7 +26,7 @@ public class RegistrationServiceTest
     [Fact]
     public async Task RegisterAsync_UserExists_ThrowsDuplicateMailException()
     {
-        _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(new User());
+        _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(new User { Name = "Test", Email = "test@test.com", PasswordHash = "hash" });
 
         await Assert.ThrowsAsync<DuplicateMailException>(() => _sut.RegisterAsync(
                 new RegisterUserDto {Name = "Test", Email = "test@test.com", Password = "password"}

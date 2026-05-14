@@ -21,11 +21,11 @@ public class ProductQueryServiceTest
     #region GetProductById
 
     [Fact]
-    public async Task GetProductById_ProductNotFound_ThrowsInvalidRequestException()
+    public async Task GetProductById_ProductNotFound_ThrowsNotFoundException()
     {
         _productRepository.GetByIdNotDeletedAsync(Arg.Any<Guid>()).Returns((Product?)null);
 
-        await Assert.ThrowsAsync<InvalidRequestException>(() =>
+        await Assert.ThrowsAsync<NotFoundException>(() =>
             _sut.GetProductById(Guid.NewGuid()));
     }
 

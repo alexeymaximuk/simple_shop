@@ -34,7 +34,7 @@ public class UserServiceTests
     [Fact]
     public async Task UpdateUsernameAsync_ValidUser_ChangesName()
     {
-        var user = new User { Name = "OldName"};
+        var user = new User { Name = "OldName", Email = "test@test.com", PasswordHash = "hash"};
         _userRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(user);
         
         await _sut.UpdateUsernameAsync(Guid.NewGuid(), new UpdateUsernameDto { Name = "NewName" });
@@ -45,31 +45,6 @@ public class UserServiceTests
 
     #endregion
     
-
-    #region DeleteSelf
-
-    [Fact]
-    public async Task DeleteSelf_EmptyGuid_ThrowsAuthorisationException()
-    {
-        await Assert.ThrowsAsync<AuthorisationException>(() =>
-            _sut.DeleteSelf(null)
-        );
-    }
-
-    [Fact]
-    public async Task DeleteSelf_ValidUser_DeletesUserFromDatabase()
-    {
-        var user = new User {Id = Guid.NewGuid(), Email = "test@test.com"};
-
-        _userRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(user);
-
-        await _sut.DeleteSelf(user.Id.ToString());
-        
-        await _userRepository.Received(1).SaveChangesAsync();
-    }
-
-    #endregion
-
 
     #region DeleteAsync
 
@@ -86,7 +61,7 @@ public class UserServiceTests
     [Fact]
     public async Task DeleteAsync_ValidUser_DeletesUserFromDatabase()
     {
-        var user = new User {Id = Guid.NewGuid(), Email = "test@test.com"};
+        var user = new User { Id = Guid.NewGuid(), Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
 
         _userRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(user);
 
@@ -114,7 +89,7 @@ public class UserServiceTests
     [Fact]
     public async Task DeactivateAsync_ValidUser_DeactivatesUserInDatabase()
     {
-        var user = new User {Id = Guid.NewGuid(), Email = "test@test.com"};
+        var user = new User { Id = Guid.NewGuid(), Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
 
         _userRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(user);
 
@@ -144,7 +119,7 @@ public class UserServiceTests
     [Fact]
     public async Task ActivateAsync_ValidUser_ActivatesUserInDatabase()
     {
-        var user = new User {Id = Guid.NewGuid(),Email = "test@test.com"};
+        var user = new User { Id = Guid.NewGuid(), Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
 
         _userRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(user);
 
@@ -172,7 +147,7 @@ public class UserServiceTests
     [Fact]
     public async Task GetByIdAsync_UserFound_ReturnsMappedDto()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = "Test", Email = "test@test.com" };
+        var user = new User { Id = Guid.NewGuid(), Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(user);
     
         var result = await _sut.GetByIdAsync(user.Id);
@@ -192,8 +167,8 @@ public class UserServiceTests
     {
         var users = new List<User>
         {
-            new() { Id = Guid.NewGuid(), Name = "name1", Email = "test1@test.com" },
-            new() { Id = Guid.NewGuid(), Name = "name1", Email = "test2@test.com" }
+            new() { Id = Guid.NewGuid(), Name = "name1", Email = "test1@test.com", PasswordHash = "hash" },
+            new() { Id = Guid.NewGuid(), Name = "name1", Email = "test2@test.com", PasswordHash = "hash" }
         };
         _userRepository.GetAllAsync().Returns(users);
 

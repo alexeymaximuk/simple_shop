@@ -1,4 +1,4 @@
-﻿namespace Shop.Users.Constants;
+﻿namespace Shop.Users.Infrastructure.Email.Constants;
 
 public class EmailTemplates
 {

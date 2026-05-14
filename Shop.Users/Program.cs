@@ -1,21 +1,20 @@
 using System.Text;
-using Microsoft.EntityFrameworkCore;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shop.Shared.Extensions;
 using Shop.Shared.Middleware;
 using Shop.Shared.Settings;
-using Shop.Users.Application.DTOs.Validators;
 using Shop.Users.Application.Interfaces;
 using Shop.Users.Application.Services;
+using Shop.Users.Application.Validators;
 using Shop.Users.Domain.Models;
+using Shop.Users.Domain.Settings;
 using Shop.Users.Infrastructure.Data;
 using Shop.Users.Infrastructure.Data.Seed;
-using Shop.Users.Infrastructure.Email;
-using Shop.Users.Settings;
 using EmailSendingService = Shop.Users.Infrastructure.Email.EmailSendingService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -143,4 +142,7 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
-public partial class Program { }
+namespace Shop.Users
+{
+    public partial class Program { }
+}

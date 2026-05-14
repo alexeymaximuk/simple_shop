@@ -1,9 +1,10 @@
 ﻿using MailKit.Security;
 using MimeKit;
 using Shop.Shared.Constants;
-using Shop.Users.Constants;
-using Shop.Users.Settings;
 using MailKit.Net.Smtp;
+using Shop.Users.Application.Interfaces;
+using Shop.Users.Domain.Settings;
+using Shop.Users.Infrastructure.Email.Constants;
 
 namespace Shop.Users.Infrastructure.Email;
 

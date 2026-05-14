@@ -69,8 +69,10 @@ public class AuthController(
     /// POST api/users/reset-password — applies new password using valid reset token
     /// </summary>
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+    public async Task<IActionResult> ResetPassword(ResetPasswordDto dto, IValidator<ResetPasswordDto> validator)
     {
+        var validationResult = await validator.ValidateAsync(dto);
+        if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
         await passwordService.ChangePasswordAsync(dto);
         return Ok();
     }

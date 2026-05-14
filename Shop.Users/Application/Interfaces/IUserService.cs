@@ -10,5 +10,4 @@ public interface IUserService
     Task DeleteAsync(Guid id);
     Task DeactivateAsync(Guid id);
     Task ActivateAsync(Guid id);
-    Task DeleteSelf(string? userId);
 }

@@ -16,21 +16,21 @@ public class User
     /// Username
     /// </summary>
     [MaxLength(256)]
-    public string Name { get; set; }
+    public required string Name { get; set; }
     
     /// <summary>
     /// Email address
     /// </summary>
     [MaxLength(256)]
-    public string Email { get; set; }
+    public required string Email { get; set; }
     
     /// <summary>
     /// Password is hashed using PasswordHasher
     /// </summary>
-    public string PasswordHash { get; set; }
+    public required string PasswordHash { get; set; }
 
     /// <summary>
-    /// For now there are only 1 possible role, User
+    /// For now there are only 2 possible roles, User and Admin
     /// </summary>
     [MaxLength(256)]
     public string Role { get; set; } = "User";

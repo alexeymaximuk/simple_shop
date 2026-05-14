@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Shared.Controllers;
 using Shop.Users.Application.DTOs.Auth;
 using Shop.Users.Application.Interfaces;
 
@@ -11,7 +11,7 @@ namespace Shop.Users.Presentation.Controllers;
 [Route("api/users")]
 public class EmailConfirmationController(
     IEmailVerificationService emailVerificationService
-) : ControllerBase
+) : ApiBaseController
 {
     /// <summary>
     /// GET api/users/confirm-email — confirms user email using token sent to their inbox
@@ -43,8 +43,7 @@ public class EmailConfirmationController(
         var validationResult = await validator.ValidateAsync(dto);
         if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        await emailVerificationService.ChangeEmailRequestAsync(Guid.Parse(userId!), dto);
+        await emailVerificationService.ChangeEmailRequestAsync(GetCurrentUserId(), dto);
         return Ok();
     }
 

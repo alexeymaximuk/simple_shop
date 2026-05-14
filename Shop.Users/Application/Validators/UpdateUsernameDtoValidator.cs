@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Shop.Users.Application.DTOs.Users;
 
-namespace Shop.Users.Application.DTOs.Validators;
+namespace Shop.Users.Application.Validators;
 
 public class UpdateUsernameDtoValidator : AbstractValidator<UpdateUsernameDto>
 {

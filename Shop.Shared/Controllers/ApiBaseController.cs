@@ -14,7 +14,9 @@ public abstract class ApiBaseController : ControllerBase
         var claim = User.FindFirstValue(ClaimTypes.NameIdentifier)
                     ?? throw new AuthorisationException("User not authorized");
 
-        return Guid.Parse(claim);
+        return Guid.TryParse(claim, out var id)
+            ? id
+            : throw new AuthorisationException("User not authorized");
     }
 }
 

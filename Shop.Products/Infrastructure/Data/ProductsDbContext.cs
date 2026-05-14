@@ -12,7 +12,7 @@ public class ProductsDbContext(DbContextOptions<ProductsDbContext> options) : Db
         modelBuilder.Entity<Product>(entity =>
         {
             entity.HasIndex(p => p.UserId);
-            entity.Property(p => p.Name).HasMaxLength(256).IsRequired();
+            entity.Property(p => p.Name).HasMaxLength(200).IsRequired();
             entity.Property(p => p.Description).IsRequired();
             entity.Property(p => p.Price).HasColumnType("decimal(18,2)").IsRequired();
         });

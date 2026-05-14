@@ -36,7 +36,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ChangeEmailRequestAsync_ValidData_SendsConfirmationMail()
     {
-        var user = new User();
+        var user = new User { Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByIdAsync(Arg.Any<Guid>()).Returns(user);
 
         await  _sut.ChangeEmailRequestAsync(
@@ -68,7 +68,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ChangeEmailConfirmAsync_PendingEmailEmpty_ThrowsInvalidRequestException()
     {
-        var user = new User { PendingEmail = null };
+        var user = new User { PendingEmail = null, Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByEmailChangeTokenAsync(Arg.Any<string>()).Returns(user);
         
         await Assert.ThrowsAsync<InvalidRequestException>(() => 
@@ -78,7 +78,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ChangeEmailConfirmAsync_TokenExpiryNull_ThrowsTokenExpiredException()
     {
-        var user = new User { PendingEmail = "newemail@test.com", EmailChangeTokenExpiry = null };
+        var user = new User { PendingEmail = "newemail@test.com", EmailChangeTokenExpiry = null, Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByEmailChangeTokenAsync(Arg.Any<string>()).Returns(user);
         
         await Assert.ThrowsAsync<TokenExpiredException>(() => 
@@ -88,7 +88,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ChangeEmailConfirmAsync_ExpiredToken_ThrowsTokenExpiredException()
     {
-        var user = new User { PendingEmail = "newemail@test.com", EmailChangeTokenExpiry = DateTime.UtcNow.AddHours(-1) };
+        var user = new User { PendingEmail = "newemail@test.com", EmailChangeTokenExpiry = DateTime.UtcNow.AddHours(-1), Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByEmailChangeTokenAsync(Arg.Any<string>()).Returns(user);
         
         await Assert.ThrowsAsync<TokenExpiredException>(() => 
@@ -102,7 +102,9 @@ public class EmailVerificationServiceTest
             Email = "oldemail@test.com",
             EmailChangeToken = "testtoken",
             PendingEmail = "newemail@test.com", 
-            EmailChangeTokenExpiry = DateTime.UtcNow.AddHours(1) 
+            EmailChangeTokenExpiry = DateTime.UtcNow.AddHours(1),
+            Name = "Test",
+            PasswordHash = "hash"
         };
         
         _userRepository.GetByEmailChangeTokenAsync(Arg.Any<string>()).Returns(user);
@@ -132,7 +134,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ConfirmEmailAsync_TokenExpiryNull_ThrowsTokenExpiredException()
     {
-        var user =  new User { EmailConfirmationTokenExpiry = null };
+        var user =  new User { EmailConfirmationTokenExpiry = null, Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByEmailConfirmationTokenAsync(Arg.Any<string>()).Returns(user);
         await Assert.ThrowsAsync<TokenExpiredException>(() =>
             _sut.ConfirmEmailAsync("token"));
@@ -141,7 +143,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ConfirmEmailAsync_TokenExpired_ThrowsTokenExpiredException()
     {
-        var user =  new User { EmailConfirmationTokenExpiry = DateTime.UtcNow.AddHours(-1) };
+        var user =  new User { EmailConfirmationTokenExpiry = DateTime.UtcNow.AddHours(-1), Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByEmailConfirmationTokenAsync(Arg.Any<string>()).Returns(user);
         await Assert.ThrowsAsync<TokenExpiredException>(() =>
             _sut.ConfirmEmailAsync("token"));
@@ -150,7 +152,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ConfirmEmailAsync_ValidData_ConfirmsUserEmail()
     {
-        var user = new User { IsEmailConfirmed = false, EmailConfirmationTokenExpiry = DateTime.UtcNow.AddHours(1) };
+        var user = new User { IsEmailConfirmed = false, EmailConfirmationTokenExpiry = DateTime.UtcNow.AddHours(1), Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByEmailConfirmationTokenAsync(Arg.Any<string>()).Returns(user);
         
         await _sut.ConfirmEmailAsync("token");
@@ -177,7 +179,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ResendConfirmationAsync_EmailConfirmed_ThrowsInvalidRequestException()
     {
-        var user = new User {IsEmailConfirmed = true};
+        var user = new User { IsEmailConfirmed = true, Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(user);
         await Assert.ThrowsAsync<InvalidRequestException>(() =>
             _sut.ResendConfirmationAsync("test@test.com"));
@@ -186,7 +188,7 @@ public class EmailVerificationServiceTest
     [Fact]
     public async Task ResendConfirmationAsync_ValidData_SendsTokenInEmail()
     {
-        var user = new User { IsEmailConfirmed = false, EmailConfirmationToken = "oldtoken"};
+        var user = new User { IsEmailConfirmed = false, EmailConfirmationToken = "oldtoken", Name = "Test", Email = "test@test.com", PasswordHash = "hash" };
         _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(user);
         
         await _sut.ResendConfirmationAsync(user.Email);

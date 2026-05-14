@@ -1,4 +1,4 @@
-﻿namespace Shop.Users.Infrastructure.Email;
+﻿namespace Shop.Users.Application.Interfaces;
 
 public interface IEmailSendingService
 {

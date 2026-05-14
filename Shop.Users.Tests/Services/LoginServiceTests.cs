@@ -42,7 +42,7 @@ public class LoginServiceTests
     [Fact]
     public async Task Login_UserNotActive_ThrowsAccountDeactivatedException()
     {
-        _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(new User { IsActive = false });
+        _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(new User { IsActive = false, Name = "Test", Email = "test@test.com", PasswordHash = "hash" });
 
         await Assert.ThrowsAsync<AccountDeactivatedException>(() =>
             _sut.Login(new LoginUserDto { Email = "test@test.com", Password = "password" }));
@@ -54,7 +54,10 @@ public class LoginServiceTests
         _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(new User
         {
             IsActive = true,
-            IsEmailConfirmed = false
+            IsEmailConfirmed = false,
+            Name = "Test",
+            Email = "test@test.com",
+            PasswordHash = "hash"
         });
 
         await Assert.ThrowsAsync<AuthorisationException>(() =>
@@ -68,7 +71,9 @@ public class LoginServiceTests
         {
             IsActive = true,
             IsEmailConfirmed = true,
-            PasswordHash = "hash"
+            PasswordHash = "hash",
+            Name = "Test",
+            Email = "test@test.com"
         });
 
         _passwordHasher.VerifyHashedPassword(Arg.Any<User>(), Arg.Any<string>(), Arg.Any<string>())

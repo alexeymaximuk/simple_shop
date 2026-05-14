@@ -37,7 +37,7 @@ public class PasswordServiceTest
     [Fact]
     public async Task ChangePasswordRequestAsync_UserDeactivated_ThrowsNotFoundException()
     {
-        _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(new User{IsActive = false});
+        _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(new User { IsActive = false, Name = "Test", Email = "test@test.com", PasswordHash = "hash" });
 
         await Assert.ThrowsAsync<AccountDeactivatedException>(() =>
             _sut.ChangePasswordRequestAsync(new ResetPasswordRequestDto {Email = "test@test.com"})
@@ -47,7 +47,7 @@ public class PasswordServiceTest
     [Fact]
     public async Task ChangePasswordRequestAsync_ValidRequest_SendsPasswordResetMail()
     {
-        var user = new User {Email = "test@test.com"};
+        var user = new User { Email = "test@test.com", Name = "Test", PasswordHash = "hash" };
         _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(user);
 
         await _sut.ChangePasswordRequestAsync(new ResetPasswordRequestDto {Email = user.Email});
@@ -58,7 +58,7 @@ public class PasswordServiceTest
     [Fact]
     public async Task ChangePasswordRequestAsync_ValidUser_SetsTokenAndExpiry()
     {
-        var user = new User { IsActive = true, Email = "test@test.com" };
+        var user = new User { IsActive = true, Email = "test@test.com", Name = "Test", PasswordHash = "hash" };
         _userRepository.GetByEmailAsync(Arg.Any<string>()).Returns(user);
 
         await _sut.ChangePasswordRequestAsync(new ResetPasswordRequestDto { Email = user.Email });
@@ -86,8 +86,11 @@ public class PasswordServiceTest
     [Fact]
     public async Task ValidateChangePasswordRequestAsync_TokenExpired_ThrowsTokenExpiredException()
     {
-        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User{
-            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(-1)
+        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User {
+            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(-1),
+            Name = "Test",
+            Email = "test@test.com",
+            PasswordHash = "hash"
         });
 
         await Assert.ThrowsAsync<TokenExpiredException>(() =>
@@ -98,8 +101,11 @@ public class PasswordServiceTest
     [Fact]
     public async Task ValidateChangePasswordRequestAsync_TokenExpiryNull_ThrowsTokenExpiredException()
     {
-        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User{
-            PasswordResetTokenExpiry = null
+        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User {
+            PasswordResetTokenExpiry = null,
+            Name = "Test",
+            Email = "test@test.com",
+            PasswordHash = "hash"
         });
 
         await Assert.ThrowsAsync<TokenExpiredException>(() =>
@@ -112,7 +118,10 @@ public class PasswordServiceTest
     {
         _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User
         {
-            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1)
+            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1),
+            Name = "Test",
+            Email = "test@test.com",
+            PasswordHash = "hash"
         });
 
         var exception = await Record.ExceptionAsync(() => _sut.ValidateChangePasswordRequestAsync("valid-token"));
@@ -138,8 +147,11 @@ public class PasswordServiceTest
     [Fact]
     public async Task ChangePasswordAsync_TokenExpired_ThrowsTokenExpiredException()
     {
-        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User{
-            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(-1)
+        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User {
+            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(-1),
+            Name = "Test",
+            Email = "test@test.com",
+            PasswordHash = "hash"
         });
 
         await Assert.ThrowsAsync<TokenExpiredException>(() =>
@@ -150,8 +162,11 @@ public class PasswordServiceTest
     [Fact]
     public async Task ChangePasswordAsync_TokenExpiryNull_ThrowsTokenExpiredException()
     {
-        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User{
-            PasswordResetTokenExpiry = null
+        _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(new User {
+            PasswordResetTokenExpiry = null,
+            Name = "Test",
+            Email = "test@test.com",
+            PasswordHash = "hash"
         });
 
         await Assert.ThrowsAsync<TokenExpiredException>(() =>
@@ -165,7 +180,9 @@ public class PasswordServiceTest
         var user = new User
         {
             Email = "test@test.com",
-            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1)
+            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1),
+            Name = "Test",
+            PasswordHash = "hash"
         };
         _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(user);
         _passwordHasher.HashPassword(Arg.Any<User>(), Arg.Any<string>()).Returns("newhash");
@@ -183,7 +200,9 @@ public class PasswordServiceTest
         {
             Email = "test@test.com",
             PasswordResetToken = "token",
-            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1)
+            PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1),
+            Name = "Test",
+            PasswordHash = "hash"
         };
         _userRepository.GetByPasswordResetTokenAsync(Arg.Any<string>()).Returns(user);
 

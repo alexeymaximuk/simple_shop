@@ -15,7 +15,7 @@ public class ProductQueryService(IProductRepository productRepository) : IProduc
     public async Task<ProductResponseDto> GetProductById(Guid productId)
     {
         var product = await productRepository.GetByIdNotDeletedAsync(productId);
-        if (product == null) throw new InvalidRequestException("Product is not found");
+        if (product == null) throw new NotFoundException("Product is not found");
 
         return MapToResponseDto(product);
     }

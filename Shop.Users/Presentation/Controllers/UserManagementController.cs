@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Shared.Controllers;
 using Shop.Users.Application.DTOs.Users;
 using Shop.Users.Application.Interfaces;
 
@@ -11,7 +11,7 @@ namespace Shop.Users.Presentation.Controllers;
 [Route("api/users")]
 public class UserManagementController(
     IUserService userService
-) : ControllerBase
+) : ApiBaseController
 {
     /// <summary>
     /// DELETE api/users/me — permanently removes the currently authenticated user from database
@@ -20,7 +20,7 @@ public class UserManagementController(
     [HttpDelete("me")]
     public async Task<IActionResult> DeleteCurrentUser()
     {
-        await userService.DeleteSelf(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        await userService.DeleteAsync(GetCurrentUserId());
         return NoContent();
     }
 
@@ -67,8 +67,7 @@ public class UserManagementController(
         var validationResult = await validator.ValidateAsync(dto);
         if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        await userService.UpdateUsernameAsync(Guid.Parse(userId!), dto);
+        await userService.UpdateUsernameAsync(GetCurrentUserId(), dto);
         return Ok();
     }
 

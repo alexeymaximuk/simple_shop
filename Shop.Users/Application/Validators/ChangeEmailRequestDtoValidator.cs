@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Shop.Users.Application.DTOs.Auth;
 
-namespace Shop.Users.Application.DTOs.Validators;
+namespace Shop.Users.Application.Validators;
 
 public class ChangeEmailRequestDtoValidator : AbstractValidator<ChangeEmailRequestDto>
 {

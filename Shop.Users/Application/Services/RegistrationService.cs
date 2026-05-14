@@ -31,6 +31,7 @@ public class RegistrationService(
         {
             Id = Guid.NewGuid(),
             Name = dto.Name,
-            Email = dto.Email
+            Email = dto.Email,
+            PasswordHash = string.Empty // overwritten immediately by passwordHasher.HashPassword
         };
 }

@@ -18,14 +18,6 @@ public class UserService(
         await userRepository.SaveChangesAsync();
     }
 
-    public async Task DeleteSelf(string? userIdString)
-    {
-        if (userIdString == null) throw new AuthorisationException("Cant get userId from current authorised user");
-        var userId = Guid.Parse(userIdString);
-
-        await DeleteAsync(userId);
-    }
-
     public async Task DeleteAsync(Guid id)
     {
         var user = await userRepository.GetByIdAsync(id);

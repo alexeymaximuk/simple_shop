@@ -337,7 +337,7 @@ public class ProductsControllerTests(ProductsApiFactory factory) : IClassFixture
 
         var response = await _client.GetAsync($"/api/products/{Guid.NewGuid()}");
 
-        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     #endregion

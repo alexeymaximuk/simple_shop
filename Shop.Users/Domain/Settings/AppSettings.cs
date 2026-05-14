@@ -1,4 +1,4 @@
-﻿namespace Shop.Users.Settings;
+﻿namespace Shop.Users.Domain.Settings;
 
 public class AppSettings
 {
