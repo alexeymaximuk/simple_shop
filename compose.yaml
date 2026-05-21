@@ -1,4 +1,21 @@
 ﻿services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: shop-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shop-network
+
   mailpit:
     image: axllent/mailpit
     container_name: shop-mailpit
@@ -55,10 +72,14 @@
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
       - JwtSettings__TokenDuration=${JWT_TOKEN_DURATION}
-      - InternalApiKey=${INTERNAL_API_KEY}
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=${PRODUCTS_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-guest}
+      - RabbitMq__Password=${RABBITMQ_PASSWORD:-guest}
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - shop-network
@@ -87,11 +108,15 @@
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
       - JwtSettings__TokenDuration=${JWT_TOKEN_DURATION}
-      - InternalApiKey=${INTERNAL_API_KEY}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-guest}
+      - RabbitMq__Password=${RABBITMQ_PASSWORD:-guest}
     depends_on:
       mailpit:
         condition: service_started
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - shop-network

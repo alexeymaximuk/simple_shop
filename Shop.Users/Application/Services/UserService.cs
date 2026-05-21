@@ -6,7 +6,7 @@ namespace Shop.Users.Application.Services;
 
 public class UserService(
     IUserRepository userRepository, 
-    IProductServiceClient productServiceClient
+    IUserEventPublisher eventPublisher
     ) : IUserService
 {
     public async Task UpdateUsernameAsync(Guid id, UpdateUsernameDto dto)
@@ -25,7 +25,7 @@ public class UserService(
         userRepository.Remove(user);
         await userRepository.SaveChangesAsync();
 
-        await productServiceClient.DeleteUserProducts(id);
+        await eventPublisher.DeleteUserProducts(id);
     }
 
     public async Task DeactivateAsync(Guid id)
@@ -35,7 +35,7 @@ public class UserService(
         user.IsActive = false;
         await userRepository.SaveChangesAsync();
 
-        await productServiceClient.DeactivateUserProducts(id);
+        await eventPublisher.DeactivateUserProducts(id);
     }
 
     public async Task ActivateAsync(Guid id)
@@ -45,7 +45,7 @@ public class UserService(
         user.IsActive = true;
         await userRepository.SaveChangesAsync();
 
-        await productServiceClient.ReactivateUserProducts(id);
+        await eventPublisher.ReactivateUserProducts(id);
     }
 
     public async Task<UserResponseDto?> GetByIdAsync(Guid id)

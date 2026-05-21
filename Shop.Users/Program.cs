@@ -1,5 +1,6 @@
 using System.Text;
 using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ using Shop.Users.Domain.Models;
 using Shop.Users.Domain.Settings;
 using Shop.Users.Infrastructure.Data;
 using Shop.Users.Infrastructure.Data.Seed;
+using Shop.Users.Infrastructure.Publishers;
 using EmailSendingService = Shop.Users.Infrastructure.Email.EmailSendingService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,18 +69,28 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmailSendingService, EmailSendingService>();
 
 builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
-builder.Services.AddScoped<IProductServiceClient, ProductServiceClient>();
+builder.Services.AddScoped<IUserEventPublisher, UserEventPublisher>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// connections
-builder.Services.AddHttpClient<IProductServiceClient, ProductServiceClient>(client =>
+// messaging
+builder.Services.AddMassTransit(x =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ProductsService:BaseUrl"]!);
-    client.DefaultRequestHeaders.Add("X-Internal-Key", builder.Configuration["InternalApiKey"]);
+    if (builder.Environment.IsEnvironment("Testing"))
+        x.UsingInMemory((ctx, cfg) => cfg.ConfigureEndpoints(ctx));
+    else
+        x.UsingRabbitMq((ctx, cfg) =>
+        {
+            cfg.Host(builder.Configuration["RabbitMq:Host"] ?? "localhost", "/", h =>
+            {
+                h.Username(builder.Configuration["RabbitMq:Username"] ?? "guest");
+                h.Password(builder.Configuration["RabbitMq:Password"] ?? "guest");
+            });
+            cfg.ConfigureEndpoints(ctx);
+        });
 });
 
 builder.Services.AddDbContext<UsersDbContext>(options =>

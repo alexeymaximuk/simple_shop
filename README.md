@@ -15,7 +15,7 @@ The system consists of three independent services, one shared library, and two t
 | `Shop.Users.Tests` | xUnit Test Project | Unit + integration tests for Shop.Users |
 | `Shop.Products.Tests` | xUnit Test Project | Unit + integration tests for Shop.Products |
 
-Services communicate over HTTP. Service-to-service calls (Users → Products) are secured with an internal API key.
+Services communicate over HTTP for user-facing calls. User lifecycle events (deactivate / reactivate / delete) are propagated from `Shop.Users` to `Shop.Products` **asynchronously via RabbitMQ** using MassTransit.
 
 ---
 
@@ -31,6 +31,7 @@ Services communicate over HTTP. Service-to-service calls (Users → Products) ar
 | Validation | FluentValidation 12 |
 | Password hashing | `Microsoft.AspNetCore.Identity.PasswordHasher<T>` |
 | Email | MailKit (SMTP) |
+| Async messaging | MassTransit 8 + RabbitMQ |
 | API documentation | Swagger / Swashbuckle (Development only) |
 | Containerisation | Docker + Docker Compose |
 | Testing | xUnit, NSubstitute, WebApplicationFactory, EF Core InMemory |
@@ -48,9 +49,9 @@ Shop/
 │   │   │   └── Users/                  # UpdateUsernameDto, UserResponseDto
 │   │   ├── Interfaces/                 # IUserRepository, ILoginService, IRegistrationService,
 │   │   │                               # IPasswordService, IEmailVerificationService,
-│   │   │                               # IUserService, IProductServiceClient, IEmailSendingService
+│   │   │                               # IUserService, IUserEventPublisher, IEmailSendingService
 │   │   ├── Services/                   # LoginService, RegistrationService, PasswordService,
-│   │   │                               # EmailVerificationService, UserService, ProductServiceClient
+│   │   │                               # EmailVerificationService, UserService
 │   │   └── Validators/                 # FluentValidation validators for all DTOs
 │   ├── Domain/
 │   │   ├── Models/User.cs
@@ -61,9 +62,11 @@ Shop/
 │   │   │   ├── UserRepository.cs
 │   │   │   ├── Seed/AdminSeeder.cs
 │   │   │   └── Migrations/
-│   │   └── Email/
-│   │       ├── EmailSendingService.cs
-│   │       └── Constants/EmailTemplates.cs
+│   │   ├── Email/
+│   │   │   ├── EmailSendingService.cs
+│   │   │   └── Constants/EmailTemplates.cs
+│   │   └── Publishers/
+│   │       └── UserEventPublisher.cs   # Publishes user lifecycle events via MassTransit
 │   ├── Presentation/
 │   │   └── Controllers/
 │   │       ├── AuthController.cs           # Register, Login, ResetPassword flows
@@ -90,9 +93,12 @@ Shop/
 │   │       ├── ProductRepository.cs
 │   │       └── Migrations/
 │   ├── Presentation/
-│   │   └── Controllers/
-│   │       ├── ProductsController.cs       # Public + authenticated product endpoints
-│   │       └── ProductsSyncController.cs   # Internal endpoints (user deactivate/delete sync)
+│   │   ├── Controllers/
+│   │   │   └── ProductsController.cs       # Public + authenticated product endpoints
+│   │   └── Consumers/
+│   │       ├── UserDeactivatedConsumer.cs  # Soft-deletes user's products
+│   │       ├── UserActivatedConsumer.cs    # Restores user's products
+│   │       └── UserDeletedConsumer.cs      # Hard-deletes user's products
 │   ├── appsettings.json
 │   ├── appsettings.Development.json
 │   ├── appsettings.Testing.json
@@ -110,12 +116,15 @@ Shop/
 │   └── Constants/ApiClients.cs
 │
 ├── Shop.Shared/                        # Shared class library
-│   ├── Constants/                      # AuthConstants, ProductsServiceRoutes
+│   ├── Constants/                      # AuthConstants
 │   ├── Controllers/                    # ApiBaseController, BaseController
 │   ├── Exceptions/                     # AppException hierarchy
 │   ├── Extensions/ConfiguratorExtensions.cs
-│   ├── Filters/InternalApiKeyAttribute.cs
 │   ├── Helpers/TokenGenerator.cs
+│   ├── Messages/                       # MassTransit event contracts
+│   │   ├── UserDeactivatedEvent.cs
+│   │   ├── UserActivatedEvent.cs
+│   │   └── UserDeletedEvent.cs
 │   ├── Middleware/ExceptionMiddleware.cs
 │   └── Settings/JwtSettings.cs
 │
@@ -136,8 +145,7 @@ Shop/
 │   ├── Integration/
 │   │   ├── ProductsApiFactory.cs
 │   │   ├── TestJwt.cs
-│   │   ├── ProductsControllerTests.cs
-│   │   └── ProductsSyncControllerTests.cs
+│   │   └── ProductsControllerTests.cs
 │   └── Services/
 │       ├── ProductCommandServiceTest.cs
 │       ├── ProductQueryServiceTest.cs
@@ -161,10 +169,10 @@ Presentation  →  Application  →  Domain
 
 | Layer | Responsibility |
 |---|---|
-| **Presentation** | Controllers — receive HTTP requests, delegate to services, return responses |
+| **Presentation** | Controllers and message consumers — receive HTTP requests or MQ events, delegate to services, return responses |
 | **Application** | Service interfaces + implementations, DTOs, validators — business logic |
 | **Domain** | Models and settings — pure data structures, no dependencies |
-| **Infrastructure** | DbContext, repositories, email sending — EF Core, external I/O |
+| **Infrastructure** | DbContext, repositories, email sending, event publishing — EF Core, external I/O |
 
 Controllers depend only on Application interfaces. Services depend only on repository interfaces. Infrastructure implements those interfaces — it is never referenced directly from Application.
 
@@ -215,9 +223,9 @@ Handles registration, login, email flows, and user administration.
 - Passwords are hashed using `Microsoft.AspNetCore.Identity.PasswordHasher`
 - Users must confirm their email before they can log in
 - Deactivated users cannot log in
-- When a user is deactivated, all their products are soft-deleted (hidden)
-- When a user is reactivated, their products are restored
-- When a user account is permanently deleted, all their products are hard-deleted
+- When a user is deactivated, a `UserDeactivatedEvent` is published — Products service soft-deletes their products
+- When a user is reactivated, a `UserActivatedEvent` is published — Products service restores their products
+- When a user account is permanently deleted, a `UserDeletedEvent` is published — Products service hard-deletes their products
 - An Admin account is seeded at startup from environment configuration
 - Roles: `User` (default), `Admin`
 
@@ -238,9 +246,6 @@ Handles product creation, editing, filtering, and visibility management.
 | GET | `/api/products/{productId}` | Public | Get product by ID |
 | GET | `/api/products/all` | Public | Get all products (filterable) |
 | GET | `/api/products/my-products` | JWT | Get caller's own products |
-| POST | `/api/products/users/{id}/deactivate` | Internal API Key | Soft-delete user's products |
-| POST | `/api/products/users/{id}/reactivate` | Internal API Key | Restore user's products |
-| DELETE | `/api/products/users/{id}/delete` | Internal API Key | Hard-delete user's products |
 
 **Product model:**
 
@@ -271,11 +276,41 @@ Handles product creation, editing, filtering, and visibility management.
 - Ownership is enforced at the service layer (`ForbiddenException` on mismatch)
 - Public listing shows only active, non-deleted products
 - Products from deactivated users are soft-deleted (hidden) until the user is reactivated
+- User lifecycle operations (deactivate / reactivate / delete) are received as MassTransit events consumed by `UserDeactivatedConsumer`, `UserActivatedConsumer`, `UserDeletedConsumer`
 
 **Validation (`ProductInfoDto`):**
 - `Name`: 2–200 characters, required
 - `Description`: 20–2000 characters, required
 - `Price`: > 0, ≤ 1,000,000
+
+---
+
+## Async Messaging (RabbitMQ / MassTransit)
+
+User lifecycle operations are decoupled from the Products service via RabbitMQ. MassTransit is used as the messaging abstraction.
+
+### Event contracts (`Shop.Shared/Messages/`)
+
+| Event | Published when | Consumed by |
+|---|---|---|
+| `UserDeactivatedEvent` | Admin deactivates a user | `UserDeactivatedConsumer` → `SoftDeleteUserProducts` |
+| `UserActivatedEvent` | Admin reactivates a user | `UserActivatedConsumer` → `RestoreUserProducts` |
+| `UserDeletedEvent` | User account is deleted | `UserDeletedConsumer` → `DeleteAllProductsForUser` |
+
+### Publisher (`Shop.Users`)
+
+`IUserEventPublisher` (defined in `Application/Interfaces/`) is the domain-facing interface. Its implementation, `UserEventPublisher` (`Infrastructure/Publishers/`), uses MassTransit's `IPublishEndpoint` to dispatch events to RabbitMQ. `UserService` depends only on the interface.
+
+### Consumers (`Shop.Products`)
+
+Three consumers in `Presentation/Consumers/` implement `IConsumer<TEvent>`. Each receives a message and calls the corresponding `IProductExternalServices` method.
+
+### Transport configuration
+
+| Environment | Transport |
+|---|---|
+| `Development` / `Production` | RabbitMQ — configured via `RabbitMq:Host`, `RabbitMq:Username`, `RabbitMq:Password` |
+| `Testing` | MassTransit InMemory — no broker required, consumers still registered |
 
 ---
 
@@ -309,13 +344,14 @@ Shared code referenced by all services:
 | `Exceptions/DuplicateMailException.cs` | → 409 |
 | `Exceptions/AccountDeactivatedException.cs` | → 403 |
 | `Extensions/ConfiguratorExtensions.cs` | `GetRequiredSettings<T>()` — throws on missing config section |
-| `Filters/InternalApiKeyAttribute.cs` | Action filter that validates `X-Internal-Key` header |
 | `Helpers/TokenGenerator.cs` | Cryptographically secure token generation via `RandomNumberGenerator` |
 | `Settings/JwtSettings.cs` | Shared JWT configuration model |
 | `Constants/AuthConstants.cs` | Token expiry durations |
-| `Constants/ProductsServiceRoutes.cs` | Route templates for Products internal endpoints |
 | `Controllers/ApiBaseController.cs` | `GetCurrentUserId()` helper for authenticated API controllers |
 | `Controllers/BaseController.cs` | `AddApiErrors()` helper for parsing API error responses into `ModelState` |
+| `Messages/UserDeactivatedEvent.cs` | MassTransit event contract — user deactivated |
+| `Messages/UserActivatedEvent.cs` | MassTransit event contract — user reactivated |
+| `Messages/UserDeletedEvent.cs` | MassTransit event contract — user deleted |
 
 **Error response format:**
 
@@ -357,7 +393,7 @@ Both `Shop.Users` and `Shop.Products` have dedicated test projects with **unit t
 Tests use `UsersApiFactory` — a `WebApplicationFactory<Program>` with:
 - EF Core InMemory database (unique per test class)
 - `IEmailSendingService` replaced with an NSubstitute mock (no real SMTP)
-- `IProductServiceClient` replaced with an NSubstitute mock (no real HTTP calls)
+- `IUserEventPublisher` replaced with an NSubstitute mock (no real message publishing)
 - Environment set to `Testing` (loads `appsettings.Testing.json`)
 
 | File | Controller | Scenarios |
@@ -368,7 +404,7 @@ Tests use `UsersApiFactory` — a `WebApplicationFactory<Program>` with:
 
 ---
 
-### Shop.Products.Tests — 52 tests
+### Shop.Products.Tests — 43 tests
 
 #### Unit tests (`Services/`)
 
@@ -382,6 +418,7 @@ Tests use `UsersApiFactory` — a `WebApplicationFactory<Program>` with:
 
 Tests use `ProductsApiFactory` — a `WebApplicationFactory<Program>` with:
 - EF Core InMemory database (unique per test class)
+- MassTransit configured with InMemory transport (no RabbitMQ broker needed)
 - Environment set to `Testing` (loads `appsettings.Testing.json`)
 
 `TestJwt.cs` generates signed JWT tokens from the same `JwtSettings` that the app uses, ensuring tokens are accepted by the real authentication middleware.
@@ -389,7 +426,6 @@ Tests use `ProductsApiFactory` — a `WebApplicationFactory<Program>` with:
 | File | Controller | Scenarios |
 |---|---|---|
 | `ProductsControllerTests.cs` | `ProductsController` | AddNewProduct (valid 201, unauthenticated, invalid data); EditProduct (valid, unauthenticated, wrong user, not found, invalid data); Deactivate (valid, unauthenticated, wrong user, already deactivated, not found); Activate (valid, unauthenticated, wrong user, already active, not found); GetProduct (found, not found); GetAllProducts; GetMyProducts (authenticated, unauthenticated) |
-| `ProductsSyncControllerTests.cs` | `ProductsSyncController` | DeactivateUser (valid key, no key, wrong key); ReactivateUser (valid key, no key, wrong key); DeleteAllUserProducts (valid key, no key, wrong key) |
 
 ---
 
@@ -404,7 +440,7 @@ dotnet test Shop.Users.Tests
 dotnet test Shop.Products.Tests
 ```
 
-Tests do **not** require a running database, SMTP server, or any other external dependency — everything is mocked or replaced with in-memory equivalents.
+Tests do **not** require a running database, SMTP server, RabbitMQ broker, or any other external dependency — everything is mocked or replaced with in-memory equivalents.
 
 ---
 
@@ -414,7 +450,7 @@ Tests do **not** require a running database, SMTP server, or any other external 
 - **JWT Bearer tokens** — issued by `Shop.Users`, validated by both `Shop.Users` and `Shop.Products`
 - **Cookie auth** — used by `Shop.Frontend` for session management
 - **JWT stored in session** — `Shop.Frontend` stores the raw JWT in server-side session and attaches it to outgoing API requests
-- **Internal API key** — service-to-service calls (Users → Products) use an `X-Internal-Key` header validated by `[InternalApiKey]` attribute
+- **Async events** — user lifecycle changes (deactivate / reactivate / delete) travel via RabbitMQ; no direct HTTP call from Users to Products
 - **Role-based authorization** — `Admin` role required for user management admin endpoints
 - All tokens (email confirmation, email change, password reset) are generated using `RandomNumberGenerator` (cryptographically secure)
 
@@ -450,6 +486,8 @@ docker compose up --build
 | `shop.users` | 8080 |
 | `shop.products` | 8081 |
 | `postgres` | 5432 |
+| `rabbitmq` (AMQP) | 5672 |
+| `rabbitmq` (Management UI) | 15672 |
 | `mailpit` (UI) | 8025 |
 | `mailpit` (SMTP) | 1026 → 1025 |
 
@@ -471,7 +509,8 @@ APP_EMAIL_FROM=
 PRODUCTS_API_URL=
 USERS_API_URL=
 
-INTERNAL_API_KEY=
+RABBITMQ_USER=
+RABBITMQ_PASSWORD=
 
 ADMIN_EMAIL=
 ADMIN_PASSWORD=
@@ -487,9 +526,10 @@ The admin account is seeded on every startup (only created if it does not yet ex
 ## Running Locally (without Docker)
 
 1. Start a PostgreSQL instance locally
-2. Configure `appsettings.Development.json` in `Shop.Users` and `Shop.Products` with connection strings and JWT settings (or use [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets))
-3. Start Mailpit (or any SMTP server) and point `Email:Host` / `Email:Port` at it
-4. Run all three services
+2. Start a RabbitMQ instance locally (default `guest`/`guest` on `localhost:5672`, or configure `RabbitMq:Host` / `RabbitMq:Username` / `RabbitMq:Password`)
+3. Configure `appsettings.Development.json` in `Shop.Users` and `Shop.Products` with connection strings and JWT settings (or use [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets))
+4. Start Mailpit (or any SMTP server) and point `Email:Host` / `Email:Port` at it
+5. Run all three services
 
 Swagger UI is available in Development at `/swagger`.
 
