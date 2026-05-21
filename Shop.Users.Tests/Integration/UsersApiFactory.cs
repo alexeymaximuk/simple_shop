@@ -30,9 +30,9 @@ public class UsersApiFactory : WebApplicationFactory<Program>
             services.AddScoped(_ => Substitute.For<IEmailSendingService>());
 
             var productDescriptors = services.Where(d =>
-                d.ServiceType == typeof(IProductServiceClient)).ToList();
+                d.ServiceType == typeof(IUserEventPublisher)).ToList();
             foreach (var d in productDescriptors) services.Remove(d);
-            services.AddScoped(_ => Substitute.For<IProductServiceClient>());
+            services.AddScoped(_ => Substitute.For<IUserEventPublisher>());
         });
 
         builder.UseEnvironment("Testing");

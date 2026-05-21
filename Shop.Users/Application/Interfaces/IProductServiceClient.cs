@@ -1,6 +1,6 @@
 ﻿namespace Shop.Users.Application.Interfaces;
 
-public interface IProductServiceClient
+public interface IUserEventPublisher
 {
     Task DeactivateUserProducts(Guid userId);
     Task ReactivateUserProducts(Guid userId);

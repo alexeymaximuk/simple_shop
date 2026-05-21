@@ -10,7 +10,7 @@ namespace Shop.Users.Tests.Services;
 public class UserServiceTests
 {
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
-    private readonly IProductServiceClient _productServiceClient = Substitute.For<IProductServiceClient>();
+    private readonly IUserEventPublisher _productServiceClient = Substitute.For<IUserEventPublisher>();
     
     private readonly UserService _sut;
 

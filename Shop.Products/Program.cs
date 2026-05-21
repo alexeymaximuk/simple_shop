@@ -1,5 +1,6 @@
 using System.Text;
 using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -7,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using Shop.Products.Application.Interfaces;
 using Shop.Products.Application.Services;
 using Shop.Products.Application.Validators;
+using Shop.Products.Infrastructure.Consumers;
 using Shop.Products.Infrastructure.Data;
 using Shop.Shared.Extensions;
 using Shop.Shared.Middleware;
@@ -52,11 +54,31 @@ builder.Services.AddControllers();
 // validators
 builder.Services.AddValidatorsFromAssemblyContaining<ProductInfoDtoValidator>();
 
-// DI
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductCommandService, ProductCommandService>();
 builder.Services.AddScoped<IProductQueryService, ProductQueryService>();
 builder.Services.AddScoped<IProductExternalServices, ProductExternalServices>();
+
+// messaging
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<UserDeactivatedConsumer>();
+    x.AddConsumer<UserActivatedConsumer>();
+    x.AddConsumer<UserDeletedConsumer>();
+
+    if (builder.Environment.IsEnvironment("Testing"))
+        x.UsingInMemory((ctx, cfg) => cfg.ConfigureEndpoints(ctx));
+    else
+        x.UsingRabbitMq((ctx, cfg) =>
+        {
+            cfg.Host(builder.Configuration["RabbitMq:Host"] ?? "localhost", "/", h =>
+            {
+                h.Username(builder.Configuration["RabbitMq:Username"] ?? "guest");
+                h.Password(builder.Configuration["RabbitMq:Password"] ?? "guest");
+            });
+            cfg.ConfigureEndpoints(ctx);
+        });
+});
 
 var jwtSettings = builder.Configuration.GetRequiredSettings<JwtSettings>(JwtSettings.SectionName);
 builder.Services.AddSingleton(jwtSettings);
