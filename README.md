@@ -15,7 +15,7 @@ The system consists of three independent services, one shared library, and two t
 | `Shop.Users.Tests` | xUnit Test Project | Unit + integration tests for Shop.Users |
 | `Shop.Products.Tests` | xUnit Test Project | Unit + integration tests for Shop.Products |
 
-Services communicate over HTTP for user-facing calls. User lifecycle events (deactivate / reactivate / delete) are propagated from `Shop.Users` to `Shop.Products` **asynchronously via RabbitMQ** using MassTransit.
+Services communicate over HTTP for user-facing calls. User lifecycle events (deactivate / reactivate / delete) are propagated from `Shop.Users` to `Shop.Products` asynchronously via RabbitMQ using MassTransit.
 
 ---
 
@@ -173,8 +173,6 @@ Presentation  →  Application  →  Domain
 | **Application** | Service interfaces + implementations, DTOs, validators — business logic |
 | **Domain** | Models and settings — pure data structures, no dependencies |
 | **Infrastructure** | DbContext, repositories, email sending, event publishing — EF Core, external I/O |
-
-Controllers depend only on Application interfaces. Services depend only on repository interfaces. Infrastructure implements those interfaces — it is never referenced directly from Application.
 
 ---
 
