@@ -6,17 +6,22 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shop.Shared.Constants;
 using Shop.Shared.Extensions;
+using Shop.Shared.Interfaces;
 using Shop.Shared.Middleware;
+using Shop.Shared.Services;
 using Shop.Shared.Settings;
 using Shop.Users.Application.Interfaces;
 using Shop.Users.Application.Services;
 using Shop.Users.Application.Validators;
 using Shop.Users.Domain.Models;
 using Shop.Users.Domain.Settings;
+using Shop.Users.Extensions;
 using Shop.Users.Infrastructure.Data;
 using Shop.Users.Infrastructure.Data.Seed;
 using Shop.Users.Infrastructure.Publishers;
+using StackExchange.Redis;
 using EmailSendingService = Shop.Users.Infrastructure.Email.EmailSendingService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,28 +31,7 @@ builder.Configuration.AddEnvironmentVariables();
 // debug
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddSwaggerGen(options =>
-        {
-            var securityDefinitionScheme = new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = "Bearer",
-                BearerFormat = "JWT",
-                In = ParameterLocation.Header
-            };
-            options.AddSecurityDefinition("Bearer", securityDefinitionScheme);
-
-            var reference = new OpenApiReference
-            {
-                Type = ReferenceType.SecurityScheme,
-                Id = "Bearer"
-            };
-            var securityRequirementsScheme = new OpenApiSecurityScheme {Reference = reference};
-            var requirement = new OpenApiSecurityRequirement {{securityRequirementsScheme, []}};
-            options.AddSecurityRequirement(requirement);
-        }
-    );
+    builder.Services.AddSwaggerWithJwt();
 }
 
 // mvc
@@ -60,10 +44,18 @@ builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDtoValidator>()
 var jwtSettings = builder.Configuration.GetRequiredSettings<JwtSettings>(JwtSettings.SectionName);
 var appSettings = builder.Configuration.GetRequiredSettings<AppSettings>(AppSettings.SectionName);
 var emailSettings = builder.Configuration.GetRequiredSettings<EmailSettings>(EmailSettings.SectionName);
-
 builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddSingleton(appSettings);
 builder.Services.AddSingleton(emailSettings);
+
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    var redisSettings = builder.Configuration.GetRequiredSettings<RedisSettings>(RedisSettings.SectionName);
+    var connectionMultiplexer = ConnectionMultiplexer.Connect(redisSettings.ConnectionUrl);
+    builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
+    builder.Services.AddSingleton<IRedisSessionService, RedisSessionService>();
+    builder.Services.AddSingleton(redisSettings);
+}
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmailSendingService, EmailSendingService>();
@@ -86,8 +78,8 @@ builder.Services.AddMassTransit(x =>
         {
             cfg.Host(builder.Configuration["RabbitMq:Host"] ?? "localhost", "/", h =>
             {
-                h.Username(builder.Configuration["RabbitMq:Username"] ?? "guest");
-                h.Password(builder.Configuration["RabbitMq:Password"] ?? "guest");
+                h.Username(builder.Configuration["RabbitMq:Username"]!);
+                h.Password(builder.Configuration["RabbitMq:Password"]!);
             });
             cfg.ConfigureEndpoints(ctx);
         });
@@ -98,22 +90,7 @@ builder.Services.AddDbContext<UsersDbContext>(options =>
 );
 
 // jwt
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidAudience = jwtSettings.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-            };
-        }
-    );
-
+builder.Services.AddJwtAuth(jwtSettings);
 
 // app
 var app = builder.Build();
@@ -122,35 +99,23 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 }
-
-if (!app.Environment.IsDevelopment())
+else 
 {
     app.UseHttpsRedirection();
-}
-else
-{
-    app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
+if (!app.Environment.IsEnvironment("Testing"))
+    app.UseSessionValidation();
+
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
-    if (!app.Environment.IsEnvironment("Testing"))
-    {
-        db.Database.Migrate();
-    }
-
-    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-    var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
-    
-    await AdminSeeder.SeedAsync(db, passwordHasher, config);
-}
+await app.InitialiseDatabaseAsync();
 
 app.Run();
 

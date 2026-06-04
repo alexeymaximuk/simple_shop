@@ -1,4 +1,6 @@
-﻿namespace Shop.Shared.Extensions;
+﻿using Microsoft.Extensions.Configuration;
+
+namespace Shop.Shared.Extensions;
 
 public static class ConfiguratorExtensions
 {

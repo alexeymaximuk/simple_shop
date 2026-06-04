@@ -5,7 +5,6 @@ using Shop.Shared.Helpers;
 using Shop.Users.Application.DTOs.Auth;
 using Shop.Users.Application.Interfaces;
 using Shop.Users.Domain.Models;
-using Shop.Users.Infrastructure.Email;
 
 namespace Shop.Users.Application.Services;
 

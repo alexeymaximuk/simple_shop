@@ -9,12 +9,14 @@ namespace Shop.Frontend.Controllers.Auth;
 
 public class RegisterController(IHttpClientFactory httpClientFactory) : BaseController
 {
+    [Route(Routes.Register)]
     [HttpGet]
     public IActionResult Register()
     {
         return View();
     }
 
+    [Route(Routes.Register)]
     [HttpPost]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {

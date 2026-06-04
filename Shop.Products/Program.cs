@@ -8,11 +8,16 @@ using Microsoft.OpenApi.Models;
 using Shop.Products.Application.Interfaces;
 using Shop.Products.Application.Services;
 using Shop.Products.Application.Validators;
+using Shop.Products.Extensions;
 using Shop.Products.Infrastructure.Consumers;
 using Shop.Products.Infrastructure.Data;
+using Shop.Shared.Constants;
 using Shop.Shared.Extensions;
+using Shop.Shared.Interfaces;
 using Shop.Shared.Middleware;
+using Shop.Shared.Services;
 using Shop.Shared.Settings;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
@@ -20,28 +25,7 @@ builder.Services.AddCors();
 // debug
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddSwaggerGen(options =>
-        {
-            var securityDefinitionScheme = new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = "Bearer",
-                BearerFormat = "JWT",
-                In = ParameterLocation.Header
-            };
-            options.AddSecurityDefinition("Bearer", securityDefinitionScheme);
-            
-            var reference = new OpenApiReference
-            {
-                Type = ReferenceType.SecurityScheme,
-                Id = "Bearer"
-            };
-            var securityRequirementsScheme = new OpenApiSecurityScheme {Reference = reference};
-            var requirement = new OpenApiSecurityRequirement {{securityRequirementsScheme, []}};
-            options.AddSecurityRequirement(requirement);
-        }
-    );
+    builder.Services.AddSwaggerWithJwt();
 }
 
 // database
@@ -53,6 +37,16 @@ builder.Services.AddControllers();
 
 // validators
 builder.Services.AddValidatorsFromAssemblyContaining<ProductInfoDtoValidator>();
+
+// DI
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    var redisSettings = builder.Configuration.GetRequiredSettings<RedisSettings>(RedisSettings.SectionName);
+    var connectionMultiplexer = ConnectionMultiplexer.Connect(redisSettings.ConnectionUrl);
+    builder.Services.AddSingleton(redisSettings);
+    builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
+    builder.Services.AddSingleton<IRedisSessionService, RedisSessionService>();
+}
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductCommandService, ProductCommandService>();
@@ -71,10 +65,10 @@ builder.Services.AddMassTransit(x =>
     else
         x.UsingRabbitMq((ctx, cfg) =>
         {
-            cfg.Host(builder.Configuration["RabbitMq:Host"] ?? "localhost", "/", h =>
+            cfg.Host(builder.Configuration["RabbitMq:Host"]!, "/", h =>
             {
-                h.Username(builder.Configuration["RabbitMq:Username"] ?? "guest");
-                h.Password(builder.Configuration["RabbitMq:Password"] ?? "guest");
+                h.Username(builder.Configuration["RabbitMq:Username"]!);
+                h.Password(builder.Configuration["RabbitMq:Password"]!);
             });
             cfg.ConfigureEndpoints(ctx);
         });
@@ -83,22 +77,8 @@ builder.Services.AddMassTransit(x =>
 var jwtSettings = builder.Configuration.GetRequiredSettings<JwtSettings>(JwtSettings.SectionName);
 builder.Services.AddSingleton(jwtSettings);
 
-//JWT
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidAudience = jwtSettings.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-            };
-        }
-    );
+// Jwt
+builder.Services.AddJwtAuth(jwtSettings);
 
 // app
 var app = builder.Build();
@@ -109,23 +89,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 }
-
-app.UseHttpsRedirection();
+else
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
+if (!app.Environment.IsEnvironment("Testing"))
+    app.UseSessionValidation();
+
 app.MapControllers();
 
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ProductsDbContext>();
-    if (!app.Environment.IsEnvironment("Testing"))
-    {
-        db.Database.Migrate();
-    }
-}
+await app.InitialiseDatabaseAsync();
 
 app.Run();
 

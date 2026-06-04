@@ -4,8 +4,6 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-      <UserSecretsId>a189b4bb-33f9-41c4-9239-e8bf593250bd</UserSecretsId>
-      <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
     <ItemGroup>
@@ -15,7 +13,6 @@
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.*" />
         <PackageReference Include="MailKit" Version="4.16.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.*" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.26" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.*">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -26,17 +23,12 @@
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.*" />
+        <PackageReference Include="Stackexchange.Redis" Version="2.13.17" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Shop.Shared\Shop.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
     </ItemGroup>
 
 </Project>

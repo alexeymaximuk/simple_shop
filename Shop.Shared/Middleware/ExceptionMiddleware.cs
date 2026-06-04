@@ -1,4 +1,6 @@
-﻿using Shop.Shared.Exceptions;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Shop.Shared.Exceptions;
 
 namespace Shop.Shared.Middleware;
 

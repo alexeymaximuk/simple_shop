@@ -16,6 +16,7 @@ public class EmailConfirmationController(
     /// <summary>
     /// GET api/users/confirm-email — confirms user email using token sent to their inbox
     /// </summary>
+    [AllowAnonymous]
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromQuery] string token)
     {
@@ -26,6 +27,7 @@ public class EmailConfirmationController(
     /// <summary>
     /// POST api/users/resend-confirmation — resends email confirmation link to provided address
     /// </summary>
+    [AllowAnonymous]
     [HttpPost("resend-confirmation")]
     public async Task<IActionResult> ResendConfirmation([FromBody] string email)
     {
@@ -50,6 +52,7 @@ public class EmailConfirmationController(
     /// <summary>
     /// GET api/users/confirm-email-change — confirms email change using token sent to new address
     /// </summary>
+    [AllowAnonymous]
     [HttpGet("confirm-email-change")]
     public async Task<IActionResult> ConfirmEmailChange([FromQuery] string token)
     {

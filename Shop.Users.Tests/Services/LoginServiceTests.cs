@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using Shop.Shared.Exceptions;
+using Shop.Shared.Interfaces;
 using Shop.Shared.Settings;
 using Shop.Users.Application.DTOs.Auth;
 using Shop.Users.Application.Interfaces;
@@ -12,6 +13,7 @@ namespace Shop.Users.Tests.Services;
 public class LoginServiceTests
 {
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
+    private readonly IRedisSessionService _redisSessionService = Substitute.For<IRedisSessionService>();
     private readonly IPasswordHasher<User> _passwordHasher = Substitute.For<IPasswordHasher<User>>();
     private readonly JwtSettings _jwtSettings = new()
     {
@@ -25,7 +27,7 @@ public class LoginServiceTests
 
     public LoginServiceTests()
     {
-        _sut = new LoginService(_userRepository, _passwordHasher, _jwtSettings);
+        _sut = new LoginService(_userRepository, _passwordHasher, _jwtSettings, _redisSessionService);
     }
 
     #region Login

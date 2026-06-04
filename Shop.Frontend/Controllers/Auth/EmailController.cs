@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Frontend.Constants;
 using Shop.Frontend.Models;
@@ -9,6 +10,7 @@ namespace Shop.Frontend.Controllers.Auth;
 
 public class EmailController(IHttpClientFactory httpClientFactory) : BaseController
 {
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> ConfirmEmail(string token)
     {
@@ -27,6 +29,7 @@ public class EmailController(IHttpClientFactory httpClientFactory) : BaseControl
         }
     }
     
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> ConfirmEmailChange(string token)
     {
@@ -45,9 +48,11 @@ public class EmailController(IHttpClientFactory httpClientFactory) : BaseControl
         }
     }
     
+    [AllowAnonymous]
     [HttpGet]
     public IActionResult ResendConfirmation() => View();
 
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> ResendConfirmation(ResendConfirmationViewModel model)
     {
