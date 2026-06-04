@@ -5,16 +5,12 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Shop.Products</RootNamespace>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="12.1.1" />
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.*" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.26" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.26" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.*">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
@@ -25,18 +21,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Shop.Shared\Shop.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Application\" />
-      <Folder Include="Domain\" />
-      <Folder Include="Presentation\" />
     </ItemGroup>
 
 </Project>

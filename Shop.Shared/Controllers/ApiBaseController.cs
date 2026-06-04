@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Shared.Constants;
 using Shop.Shared.Exceptions;
 
 namespace Shop.Shared.Controllers;
@@ -11,7 +12,7 @@ public abstract class ApiBaseController : ControllerBase
 {
     protected Guid GetCurrentUserId()
     {
-        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier)
+        var claim = User.FindFirstValue(AuthConstants.ClaimNames.Sub)
                     ?? throw new AuthorisationException("User not authorized");
 
         return Guid.TryParse(claim, out var id)
@@ -19,4 +20,3 @@ public abstract class ApiBaseController : ControllerBase
             : throw new AuthorisationException("User not authorized");
     }
 }
-

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using Shop.Shared.Interfaces;
 using Shop.Users.Application.Interfaces;
 using Shop.Users.Infrastructure.Data;
-using Shop.Users.Infrastructure.Email;
 
 namespace Shop.Users.Tests.Integration;
 
@@ -33,6 +33,11 @@ public class UsersApiFactory : WebApplicationFactory<Program>
                 d.ServiceType == typeof(IUserEventPublisher)).ToList();
             foreach (var d in productDescriptors) services.Remove(d);
             services.AddScoped(_ => Substitute.For<IUserEventPublisher>());
+
+            var redisDescriptors = services.Where(d =>
+                d.ServiceType == typeof(IRedisSessionService)).ToList();
+            foreach (var d in redisDescriptors) services.Remove(d);
+            services.AddSingleton(_ => Substitute.For<IRedisSessionService>());
         });
 
         builder.UseEnvironment("Testing");

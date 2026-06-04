@@ -4,7 +4,6 @@ using Shop.Users.Application.DTOs.Auth;
 using Shop.Users.Application.Interfaces;
 using Shop.Users.Application.Services;
 using Shop.Users.Domain.Models;
-using Shop.Users.Infrastructure.Email;
 
 namespace Shop.Users.Tests.Services;
 

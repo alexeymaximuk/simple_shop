@@ -78,6 +78,7 @@ public class ProductsController(
     /// <summary>
     /// GET api/products/{productId} — returns a single product by id
     /// </summary>
+    [AllowAnonymous]
     [HttpGet("{productId}")]
     public async Task<IActionResult> GetProduct(Guid productId)
     {
@@ -89,6 +90,7 @@ public class ProductsController(
     /// <summary>
     /// GET api/products/all — returns all active products, supports filtering by name, price range and owner
     /// </summary>
+    [AllowAnonymous]
     [HttpGet("all")]
     public async Task<IActionResult> GetAllProducts([FromQuery] ProductFilterDto filter)
     {

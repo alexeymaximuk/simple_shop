@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Shop.Shared.Constants;
 
 namespace Shop.Products.Tests.Integration;
 
@@ -12,10 +13,11 @@ public static class TestJwt
     {
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-            new Claim(ClaimTypes.Name, "TestUser"),
-            new Claim(ClaimTypes.Email, "test@test.com"),
-            new Claim(ClaimTypes.Role, role)
+            new Claim(AuthConstants.ClaimNames.Sub, userId.ToString()),
+            new Claim(AuthConstants.ClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(AuthConstants.ClaimNames.Name, "TestUser"),
+            new Claim(AuthConstants.ClaimNames.Email, "test@test.com"),
+            new Claim(AuthConstants.ClaimNames.Role, role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!));

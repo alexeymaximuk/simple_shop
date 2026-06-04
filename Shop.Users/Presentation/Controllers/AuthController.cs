@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Users.Application.DTOs.Auth;
 using Shop.Users.Application.Interfaces;
@@ -16,6 +17,7 @@ public class AuthController(
     /// <summary>
     /// POST api/users/register — creates new user account and sends confirmation email
     /// </summary>
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterUserDto dto, IValidator<RegisterUserDto> validator)
     {
@@ -30,6 +32,7 @@ public class AuthController(
     /// <summary>
     /// POST api/users/login — authenticates user and returns JWT token
     /// </summary>
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginUserDto dto, IValidator<LoginUserDto> validator)
     {
@@ -44,6 +47,7 @@ public class AuthController(
     /// <summary>
     /// POST api/users/reset-password-request — sends password reset link to provided email
     /// </summary>
+    [AllowAnonymous]
     [HttpPost("reset-password-request")]
     public async Task<IActionResult> ResetPasswordRequest(ResetPasswordRequestDto dto, IValidator<ResetPasswordRequestDto> validator)
     {
@@ -58,6 +62,7 @@ public class AuthController(
     /// <summary>
     /// GET api/users/reset-password — validates password reset token from email link
     /// </summary>
+    [AllowAnonymous]
     [HttpGet("reset-password")]
     public async Task<IActionResult> ResetPassword([FromQuery] string token)
     {
@@ -68,6 +73,7 @@ public class AuthController(
     /// <summary>
     /// POST api/users/reset-password — applies new password using valid reset token
     /// </summary>
+    [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(ResetPasswordDto dto, IValidator<ResetPasswordDto> validator)
     {

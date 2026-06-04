@@ -4,6 +4,6 @@ public class AppSettings
 {
     public const string SectionName = "App";
 
-    public string BaseUrl { get; set; }
-    public string EmailFrom { get; set; }
+    public required string BaseUrl { get; set; }
+    public required string EmailFrom { get; set; }
 }

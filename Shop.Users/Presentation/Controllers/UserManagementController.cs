@@ -74,6 +74,7 @@ public class UserManagementController(
     /// <summary>
     /// GET api/users/{id} — returns user by id
     /// </summary>
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
